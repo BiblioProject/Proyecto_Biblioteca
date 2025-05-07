@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-$yirim%ja@u2!+b+63%_=ckp5d9h=2z%3bz@+5x^c$5tj#a%0g
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+CSRF_TRUSTED_ORIGINS = ['https://*.cloudshell.dev/']
 
 # Application definition
 
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'app_biblioteca',
 ]
 
 MIDDLEWARE = [
@@ -121,3 +122,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = '/app_biblioteca/login/'
+LOGIN_REDIRECT_URL = '/app_biblioteca/'
+LOGOUT_REDIRECT_URL = '/app_biblioteca/login'
