@@ -5,6 +5,10 @@ from django.contrib import auth
 from django.contrib import messages
 from django.shortcuts import redirect
 
+@login_required(login_url='/app_biblioteca/login/')
+def main(request):
+   return render(request, 'lendings.html')
+
 def login(request):
    args = {}
    return TemplateResponse(request, 'login.html', args)
