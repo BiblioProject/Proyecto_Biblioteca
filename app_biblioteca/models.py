@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from datetime import timedelta
 
-class Category(models.Model):
+class Genre(models.Model):
     name = models.CharField(max_length=100, blank=False)
 
     is_active = models.BooleanField(default=True)
@@ -42,7 +42,7 @@ class Book(models.Model):
 
     editorial = models.ForeignKey(Editorial, on_delete=models.CASCADE)
     language = models.ForeignKey(Language, on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
     def clean(self):
         # Validaciones de publicación
