@@ -71,7 +71,7 @@ class Book(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.title} - {self.author}"
+        return self.title
 
 class Reader(models.Model):
     name = models.CharField(max_length=30, blank=False)
@@ -148,8 +148,26 @@ class Lending(models.Model):
                 raise ValidationError("No hay ejemplares disponibles.")
             self.book.available -= 1
             self.book.save()
-        else:  # Actualización (devolución)
-            if self.real_return_date and self.state == 0:  # Prestado
+        else:
+            old = Lending.objects.get(pk=self.pk)
+
+            # 🔁 Si pasa de Devuelto o Atrasado a Prestado
+            if old.state in [1, 2] and self.state == 0:
+                if self.book.available <= 0:
+                    raise ValidationError("No hay ejemplares disponibles.")
+                self.book.available -= 1
+                self.real_return_date = None  # opcional: borrar fecha de devolución
+
+                # Solo si el estado anterior era Atrasado (2), revertir sanciones
+                if old.state == 2:
+                    self.reader.sanctions = max(0, self.reader.sanctions - 1)
+                    self.reader.sanction_amount = max(0, self.reader.sanction_amount - old.calculated_sanction_amount)
+                    self.reader.save()
+
+                self.book.save()
+
+            # ✅ Si se devuelve el libro por primera vez (de Prestado a Devuelto/Atrasado)
+            elif old.state == 0 and self.real_return_date:
                 if self.real_return_date > self.estimated_return_date:
                     self.state = 2  # Atrasado
                     self.reader.sanctions += 1
