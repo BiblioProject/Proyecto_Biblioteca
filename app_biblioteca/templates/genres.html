@@ -4,18 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Préstamos</title>
+    <title>Géneros</title>
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-icons.css' %}">
-    <link rel="stylesheet" href="{% static 'css/main.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}?v=3">
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 </head>
 <body>
     {% block content %}
     {% include 'partials/topbar.html' %}    
     <div class="page-header d-flex align-items-center justify-content-between">
-        <h2>Préstamos</h2>
-        <span id="addlending" class="act-btn text-primary" title="Agregar Préstamo" style="cursor: pointer; font-size: 25px;">
+        <h2>Géneros</h2>
+        <span id="addgenre" class="act-btn text-primary" title="Agregar Género" style="cursor: pointer; font-size: 25px;">
             <i class="bi bi-plus-circle-fill fs-l"></i>
         </span>
     </div>
@@ -24,41 +24,17 @@
             <thead class="table-light">
                 <tr>
                     <th>ID</th>
-                    <th>Lector</th>
-                    <th>Libro</th>
-                    <th>Fecha</th>
-                    <th>Retorno estimado</th>
-                    <th>Retorno real</th>
-                    <th>Estado</th>
+                    <th>Nombre</th>
                     <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
-                {% for lending in page_obj %}
-                <tr data-lendingid="{{ lending.id }}">
-                    <td>{{ lending.id }}</td>
-                    <td>{{ lending.reader }}</td>
-                    <td>{{ lending.book }}</td>
-                    <td>{{ lending.date }}</td>
-                    <td>{{ lending.estimated_return_date }}</td>
+                {% for genre in page_obj %}
+                <tr data-genreid="{{ genre.id }}">
+                    <td>{{ genre.id }}</td>
+                    <td>{{ genre.name }}</td>
                     <td>
-                        {% if lending.real_return_date %}
-                          {{ lending.real_return_date }}
-                        {% else %}
-                          Sin especificar
-                        {% endif %}
-                    </td>                      
-                    <td>
-                        {% if lending.state == 0 %}
-                            <i class="bi bi-circle" style="color:blue;" title="Pendiente"></i>
-                        {% elif lending.state == 1 %}
-                            <i class="bi bi-check-circle-fill" style="color:green;" title="Devuelto"></i>
-                        {% else %}
-                            <i class="bi bi-x-circle-fill" style="color:red;" title="Atrasado"></i>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <span class="act-btn delete-lending text-danger" title="Borrar Préstamo" style="cursor: pointer; font-size:25px;">
+                        <span class="act-btn delete-genre text-danger" title="Borrar Género" style="cursor: pointer; font-size:25px;">
                             <i class="bi bi-trash3-fill fs-5"></i>
                         </span>
                     </td>
@@ -73,15 +49,15 @@
 </html>
 
 <script type="text/javascript">
-    document.querySelectorAll(".delete-lending").forEach((btn) => {
+    document.querySelectorAll(".delete-genre").forEach((btn) => {
         btn.onclick = function() {
-            delete_lending(this.closest("tr").dataset.lendingid);
+            delete_genre(this.closest("tr").dataset.genreid);
         };
     });
 
-    function delete_lending(lendingid) {
+    function delete_genre(genreid) {
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", "{% url 'delete_lending' %}", true);
+        xhr.open("POST", "{% url 'delete_genre' %}", true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
         
@@ -100,6 +76,6 @@
             }
         };
         
-        xhr.send("lendingid=" + lendingid);
+        xhr.send("genreid=" + genreid);
     }
 </script>

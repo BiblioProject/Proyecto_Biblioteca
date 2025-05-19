@@ -46,3 +46,11 @@ body {
 	margin: 0;
 }
 
+.truncated-text {
+    max-height: 3em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    white-space: nowrap;
+    width: 200px;
+}
