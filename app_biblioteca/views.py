@@ -1,5 +1,5 @@
 from django.core.paginator import Paginator
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.template.response import TemplateResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import auth, messages
@@ -80,83 +80,105 @@ def valida_user(request):
         messages.info(request, 'Credenciales incorrectas')
   return redirect('/app_biblioteca/')
 
+# Función genérica para listar objetos con paginación: Puede filtrar por un campo específico si se proporciona `filter_field` y `filter_value`.
 @login_required(login_url='/app_biblioteca/login/')
-def delete_lending(request):
+def list_objects(request, model, template, filter_field=None, filter_value=None, per_page=7):
+    query_params = {"is_active": True}
+    if filter_field and filter_value:
+        query_params[filter_field] = filter_value
+    
+    queryset = model.objects.filter(**query_params)
+    paginator = Paginator(queryset, per_page)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, template, {'page_obj': page_obj})
+
+@login_required(login_url='/app_biblioteca/login/')
+def books_view(request):
+    return list_objects(request, Book, 'books.html', per_page=5)
+
+@login_required(login_url='/app_biblioteca/login/')
+def main(request):
+    return list_objects(request, Lending, 'lendings.html')
+
+@login_required(login_url='/app_biblioteca/login/')
+def readers_view(request):
+    return list_objects(request, Reader, 'readers.html')
+
+@login_required(login_url='/app_biblioteca/login/')
+def editorials_view(request):
+    return list_objects(request, Editorial, 'editorials.html')
+
+@login_required(login_url='/app_biblioteca/login/')
+def genres_view(request):
+    return list_objects(request, Genre, 'genres.html')
+
+@login_required(login_url='/app_biblioteca/login/')
+def languages_view(request):
+    return list_objects(request, Language, 'languages.html')
+
+# Función para listar préstamos según libro
+@login_required(login_url='/app_biblioteca/login/')
+def lendings_book(request, bookid):
+    return list_objects(request, Lending, 'lendings.html', filter_field="book_id", filter_value=bookid)
+
+# Función para listar préstamos según lector
+@login_required(login_url='/app_biblioteca/login/')
+def lendings_reader(request, readerid):
+    return list_objects(request, Lending, 'lendings.html', filter_field="reader_id", filter_value=readerid)
+
+# Función para listar libros según editorial
+@login_required(login_url='/app_biblioteca/login/')
+def books_editorial(request, editorialid):
+    return list_objects(request, Book, 'books.html', filter_field="editorial_id", filter_value=editorialid)
+
+# Función para listar libros según género
+@login_required(login_url='/app_biblioteca/login/')
+def books_genre(request, genreid):
+    return list_objects(request, Book, 'books.html', filter_field="genre_id", filter_value=genreid)
+
+# Función para listar libros según idioma
+@login_required(login_url='/app_biblioteca/login/')
+def books_language(request, languageid):
+    return list_objects(request, Book, 'books.html', filter_field="language_id", filter_value=languageid)
+
+@login_required(login_url='/app_biblioteca/login/')
+def delete_object(request, model, object_id_name):
     if request.method == "POST":
-        lendingid = request.POST.get("lendingid", None)
-        if lendingid:
-            lending = get_object_or_404(Lending, id=lendingid)
-            lending.is_active = False
-            lending.save()
+        object_id = request.POST.get(object_id_name, None)
+        if object_id:
+            obj = get_object_or_404(model, id=object_id)
+            obj.is_active = False
+            obj.save()
             return JsonResponse({"success": True})
         return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
-    
+
     return JsonResponse({"success": False, "error": "Método no permitido"})
+
+@login_required(login_url='/app_biblioteca/login/')
+def delete_lending(request):
+    return delete_object(request, Lending, "lendingid")
 
 @login_required(login_url='/app_biblioteca/login/')
 def delete_reader(request):
-    if request.method == "POST":
-        readerid = request.POST.get("readerid", None)
-        if readerid:
-            reader = get_object_or_404(Reader, id=readerid)
-            reader.is_active = False
-            reader.save()
-            return JsonResponse({"success": True})
-        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
-    
-    return JsonResponse({"success": False, "error": "Método no permitido"})
+    return delete_object(request, Reader, "readerid")
 
 @login_required(login_url='/app_biblioteca/login/')
 def delete_book(request):
-    if request.method == "POST":
-        bookid = request.POST.get("bookid", None)
-        if bookid:
-            book = get_object_or_404(Book, id=bookid)
-            book.is_active = False
-            book.save()
-            return JsonResponse({"success": True})
-        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
-    
-    return JsonResponse({"success": False, "error": "Método no permitido"})
+    return delete_object(request, Book, "bookid")
 
 @login_required(login_url='/app_biblioteca/login/')
 def delete_editorial(request):
-    if request.method == "POST":
-        editorialid = request.POST.get("editorialid", None)
-        if editorialid:
-            editorial = get_object_or_404(Editorial, id=editorialid)
-            editorial.is_active = False
-            editorial.save()
-            return JsonResponse({"success": True})
-        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
-    
-    return JsonResponse({"success": False, "error": "Método no permitido"})
+    return delete_object(request, Editorial, "editorialid")
 
 @login_required(login_url='/app_biblioteca/login/')
 def delete_genre(request):
-    if request.method == "POST":
-        genreid = request.POST.get("genreid", None)
-        if genreid:
-            genre = get_object_or_404(Genre, id=genreid)
-            genre.is_active = False
-            genre.save()
-            return JsonResponse({"success": True})
-        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
-    
-    return JsonResponse({"success": False, "error": "Método no permitido"})
+    return delete_object(request, Genre, "genreid")
 
 @login_required(login_url='/app_biblioteca/login/')
 def delete_language(request):
-    if request.method == "POST":
-        languageid = request.POST.get("languageid", None)
-        if languageid:
-            language = get_object_or_404(Language, id=languageid)
-            language.is_active = False
-            language.save()
-            return JsonResponse({"success": True})
-        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
-    
-    return JsonResponse({"success": False, "error": "Método no permitido"})
+    return delete_object(request, Language, "languageid")
 
 def createBook(request):
    if request.method == 'POST':

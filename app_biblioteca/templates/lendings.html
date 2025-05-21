@@ -44,11 +44,27 @@
                     <td>{{ lending.id }}</td>
                     <td>{{ lending.reader }}</td>
                     <td>{{ lending.book }}</td>
-                    <td>{{ lending.date }}</td>
-                    <td>{{ lending.estimated_return_date }}</td>
+                    <td>
+                        <div class="rounded-pill bg-primary text-white p-1">
+                            {{ lending.date }}
+                        </div>                    
+                    </td>
+                    <td>
+                        <div class="rounded-pill bg-secondary text-white p-1">
+                            {{ lending.estimated_return_date }}
+                        </div>    
+                    </td>
                     <td>
                         {% if lending.real_return_date %}
-                          {{ lending.real_return_date }}
+                            {% if lending.state == 1 %}
+                                <div class="rounded-pill bg-success text-white p-1">
+                                    {{ lending.real_return_date }}
+                                </div>
+                            {% else %}
+                                <div class="rounded-pill bg-danger text-white p-1">
+                                    {{ lending.real_return_date }}
+                                </div>
+                            {% endif %}
                         {% else %}
                           Sin especificar
                         {% endif %}

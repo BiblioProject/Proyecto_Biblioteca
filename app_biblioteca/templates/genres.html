@@ -31,7 +31,9 @@
             <tbody>
                 {% for genre in page_obj %}
                 <tr data-genreid="{{ genre.id }}">
-                    <td>{{ genre.id }}</td>
+                    <td class="clickable">
+                        <a href={% url 'books_genre' genreid=genre.id %}>{{ genre.id }}</a>
+                    </td>
                     <td>{{ genre.name }}</td>
                     <td>
                         <span class="act-btn delete-genre text-danger" title="Borrar Género" style="cursor: pointer; font-size:25px;">

@@ -34,14 +34,16 @@
                     <th>Dirección</th>
                     <th>Número</th>
                     <th>Sanciones</th>
-                    <th>Monto de Sanción</th>
+                    <th>Monto de sanción</th>
                     <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
                 {% for reader in page_obj %}
                 <tr data-readerid="{{ reader.id }}">
-                    <td>{{ reader.id }}</td>
+                    <td class="clickable">
+                        <a href={% url 'lendings_reader' readerid=reader.id %}>{{ reader.id }}</a>
+                    </td>
                     <td>{{ reader.name }}</td>
                     <td>{{ reader.first_surname }}
                         {% if reader.second_surname %}
@@ -52,20 +54,47 @@
                     </td>
                     <td>
                         {% if reader.address %}
-                            {{ reader.address }}
+                            {% if reader.address %}
+                                <span class="preview">
+                                    {{ reader.address|slice:":20" }}{% if reader.address|length > 20 %}<span class="ellipsis">…</span>{% endif %}
+                                </span>
+                                <span class="hidden" style="display: none;">{{ reader.address|slice:"20:" }}</span>
+                                <span class="expand-btn text-primary" style="cursor:pointer;">Ver más</span>
+                            {% else %}
+                                Sin especificar
+                            {% endif %}
                         {% else %}
                             Sin especificar
                         {% endif %}
                     </td>
                     <td>
                         {% if reader.phone %}
-                            {{ reader.phone }}
+                            <div class="rounded-pill bg-secondary text-white p-1">
+                                {{ reader.phone }}
+                            </div>
                         {% else %}
                             Sin especificar
                         {% endif %}
                     </td>
-                    <td>{{ reader.sanctions }}</td>
-                    <td>{{ reader.sanction_amount }}</td>
+                    <td>
+                        {% if reader.sanctions == 0 %}
+                            {{ reader.sanctions }}
+                        {% else %}
+                            <div class="text-danger">
+                                {{ reader.sanctions }}
+                            </div>
+                        {% endif %}
+                        
+                    </td>
+                    <td>
+                        {% if reader.sanctions == 0 %}
+                            S/{{ reader.sanction_amount }}
+                        {% else %}
+                            <div class="text-danger">
+                                S/{{ reader.sanction_amount }}
+                            </div>
+                        {% endif %}
+                    </td>
                     <td>
                         <span class="act-btn delete-reader text-danger" title="Borrar Lector" style="cursor: pointer; font-size:25px;">
                             <i class="bi bi-trash3-fill fs-5"></i>
@@ -112,6 +141,25 @@
 </html>
 
 <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".expand-btn").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const hiddenText = this.previousElementSibling;
+                const ellipsis = this.previousElementSibling.previousElementSibling.querySelector(".ellipsis");
+
+                if (hiddenText.style.display === "none" || hiddenText.style.display === "") {
+                    hiddenText.style.display = "inline";
+                    ellipsis.style.display = "none"; // Oculta los puntos suspensivos
+                    this.textContent = "Ver menos";
+                } else {
+                    hiddenText.style.display = "none";
+                    ellipsis.style.display = "inline"; // Muestra los puntos suspensivos nuevamente
+                    this.textContent = "Ver más";
+                }
+            });
+        });
+    });
+
     document.querySelectorAll(".delete-reader").forEach((btn) => {
         btn.onclick = function() {
             delete_reader(this.closest("tr").dataset.readerid);
