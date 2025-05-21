@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'css/main.css' %}?v=1">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 </head>
 <body>
@@ -37,9 +39,12 @@
     </div>
     <div class="page-header d-flex align-items-center justify-content-between">
         <h2>Libros</h2>
-        <span id="addbook" class="act-btn text-primary" title="Agregar Libro" style="cursor: pointer; font-size: 25px;">
+        <!--<span id="addbook" class="act-btn text-primary" title="Agregar Libro" style="cursor: pointer; font-size: 25px;">
             <i class="bi bi-plus-circle-fill fs-l"></i>
-        </span>
+        </span>-->
+        <button class="btn btn-sm btn-outline-primary" title="Crear Libro" onclick="abrir_modal_creacion('{% url 'create_book' %}')">
+            <i class="bi bi-plus-circle-fill fs-l"></i>
+        </button>
     </div>
     <div class="table-responsive mt-3">
         <table class="table table-bordered table-hover text-center align-middle bg-white">
@@ -77,12 +82,42 @@
                         <span class="act-btn delete-book text-danger" title="Borrar Libro" style="cursor: pointer; font-size:25px;">
                             <i class="bi bi-trash3-fill fs-5"></i>
                         </span>
+                        <!--<span class="act-btn edit-book text-secondary" title="Editar Libro" style="cursor: pointer; font-size:25px;">
+                            <i class="bi bi-pencil-square"></i>
+                        </span>-->
+                        <button class="btn btn-sm btn-outline-secondary" title="Editar Libro" onclick="abrir_modal_edicion('{% url 'edit_book' book.id %}')">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    <div class="modal fade" id="creacion" role="dialog">
+
+    </div>
+    <div class="modal fade" id="edicion" role="dialog">
+
+    </div>
     {% endblock %}
+    {% block extrajs %}
+    <!-- Códigos JS para que muestre el modal de edición y creación de libros-->
+    <script type="text/javascript">
+        var $ = jQuery.noConflict();
+
+        function abrir_modal_edicion(url) {
+            $('#edicion').load(url, function() {
+                $('#edicion').modal('show');
+            });
+        }
+
+        function abrir_modal_creacion(url) {
+            $('#creacion').load(url, function() {
+                $('#creacion').modal('show');
+            });
+        }
+    </script>
+    {% endblock extrajs %}
 </body>
 </html>

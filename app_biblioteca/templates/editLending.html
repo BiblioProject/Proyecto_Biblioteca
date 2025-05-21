@@ -1,0 +1,98 @@
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Edición de Préstamo</h2>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span>&times;</span>
+      </button>
+        </div>
+
+        <form id="lending-form" method="post" action="{% url 'edit_lending' lending.id %}">
+            {% csrf_token %}
+            <div class="modal-body">
+
+                {% if lending_form.errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for field in lending_form %} {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                        {% endfor %} {% endfor %} {% for error in lending_form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Renderiza los demás campos excepto los dos anteriores -->
+                {% for field in lending_form %} {% if field.name != 'date' and field.name != 'real_return_date' %}
+                <div class="form-group">
+                    {{ field.label_tag }} {{ field }} {% if field.errors %}
+                    <div class="text-danger small">
+                        {% for error in field.errors %} {{ error }}<br> {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %} {% endfor %}
+
+                <!-- Campo: Fecha de préstamo -->
+                <div class="form-group">
+                    {{ lending_form.date.label_tag }} {{ lending_form.date }}
+                </div>
+
+                <!-- Campo: Retorno real (con validación visual) -->
+                <div class="form-group">
+                    {{ lending_form.real_return_date.label_tag }} {{ lending_form.real_return_date }}
+                    <div class="invalid-feedback">
+                        La fecha de retorno real no puede ser anterior a la fecha de préstamo.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Confirmar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- VALIDACIÓN DE FECHAS CON JS -->
+<script>
+    (function() {
+        const loanDateInput = document.getElementById('id_date');
+        const returnDateInput = document.getElementById('id_real_return_date');
+        const form = document.getElementById('lending-form');
+
+        function validateReturnDate() {
+            const loanValue = loanDateInput.value;
+            const returnValue = returnDateInput.value;
+
+            if (!loanValue || !returnValue) {
+                returnDateInput.classList.remove('is-invalid');
+                return true;
+            }
+
+            const loanDate = new Date(loanValue);
+            const returnDate = new Date(returnValue);
+
+            if (returnDate < loanDate) {
+                returnDateInput.classList.add('is-invalid');
+                return false;
+            } else {
+                returnDateInput.classList.remove('is-invalid');
+                return true;
+            }
+        }
+
+        returnDateInput.addEventListener('change', validateReturnDate);
+        loanDateInput.addEventListener('change', validateReturnDate);
+
+        form.addEventListener('submit', function(e) {
+            if (!validateReturnDate()) {
+                e.preventDefault();
+                returnDateInput.focus();
+            }
+        });
+    })();
+</script>

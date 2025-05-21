@@ -1,0 +1,95 @@
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Creación de Libro</h2>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span>&times;</span>
+      </button>
+        </div>
+
+        <form id="book-form" method="post" action="{% url 'create_book' %}">
+            {% csrf_token %}
+            <div class="modal-body">
+
+                {% if book_form.errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for field in book_form %} {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                        {% endfor %} {% endfor %} {% for error in book_form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Renderizar todos los campos excepto stock y disponibles -->
+                {% for field in book_form %} {% if field.name != 'stock' and field.name != 'available' %}
+                <div class="form-group">
+                    {{ field.label_tag }} {{ field }} {% if field.errors %}
+                    <div class="text-danger small">
+                        {% for error in field.errors %} {{ error }}<br> {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %} {% endfor %}
+
+                <!-- Campo: Stock -->
+                <div class="form-group">
+                    {{ book_form.stock.label_tag }} {{ book_form.stock }}
+                </div>
+
+                <!-- Campo: Disponibles (con validación visual) -->
+                <div class="form-group">
+                    {{ book_form.available.label_tag }} {{ book_form.available }}
+                    <div class="invalid-feedback">
+                        El número de disponibles no puede ser mayor que el stock total.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Confirmar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- VALIDACIÓN DE STOCK/DISPONIBLES -->
+<script>
+    (function() {
+        const stockInput = document.getElementById('id_stock');
+        const availableInput = document.getElementById('id_available');
+        const form = document.getElementById('book-form');
+
+        function validateAvailable() {
+            const stock = parseInt(stockInput.value);
+            const available = parseInt(availableInput.value);
+
+            if (isNaN(stock) || isNaN(available)) {
+                availableInput.classList.remove('is-invalid');
+                return true;
+            }
+
+            if (available > stock) {
+                availableInput.classList.add('is-invalid');
+                return false;
+            } else {
+                availableInput.classList.remove('is-invalid');
+                return true;
+            }
+        }
+
+        stockInput.addEventListener('change', validateAvailable);
+        availableInput.addEventListener('change', validateAvailable);
+
+        form.addEventListener('submit', function(e) {
+            if (!validateAvailable()) {
+                e.preventDefault();
+                availableInput.focus();
+            }
+        });
+    })();
+</script>
