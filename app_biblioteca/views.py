@@ -2,21 +2,14 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.template.response import TemplateResponse
 from django.contrib.auth.decorators import login_required
-<<<<<<< HEAD
-from django.contrib import auth
-from django.contrib import messages
-from django.shortcuts import redirect
-from .models import Lending, Book, Reader
-from .forms import BookForm, ReaderForm, LendingForm
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-=======
 from django.contrib import auth, messages
 from .models import Lending, Book, Reader, Editorial, Genre, Language
 from django.conf import settings
 import glob,os, json
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
->>>>>>> 205892282ee1e232723eff01ed201c0728804e50
+from .forms import BookForm, ReaderForm, LendingForm
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 @login_required(login_url='/app_biblioteca/login/')
 def main(request):
@@ -87,7 +80,84 @@ def valida_user(request):
         messages.info(request, 'Credenciales incorrectas')
   return redirect('/app_biblioteca/')
 
-<<<<<<< HEAD
+@login_required(login_url='/app_biblioteca/login/')
+def delete_lending(request):
+    if request.method == "POST":
+        lendingid = request.POST.get("lendingid", None)
+        if lendingid:
+            lending = get_object_or_404(Lending, id=lendingid)
+            lending.is_active = False
+            lending.save()
+            return JsonResponse({"success": True})
+        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
+    
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+@login_required(login_url='/app_biblioteca/login/')
+def delete_reader(request):
+    if request.method == "POST":
+        readerid = request.POST.get("readerid", None)
+        if readerid:
+            reader = get_object_or_404(Reader, id=readerid)
+            reader.is_active = False
+            reader.save()
+            return JsonResponse({"success": True})
+        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
+    
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+@login_required(login_url='/app_biblioteca/login/')
+def delete_book(request):
+    if request.method == "POST":
+        bookid = request.POST.get("bookid", None)
+        if bookid:
+            book = get_object_or_404(Book, id=bookid)
+            book.is_active = False
+            book.save()
+            return JsonResponse({"success": True})
+        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
+    
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+@login_required(login_url='/app_biblioteca/login/')
+def delete_editorial(request):
+    if request.method == "POST":
+        editorialid = request.POST.get("editorialid", None)
+        if editorialid:
+            editorial = get_object_or_404(Editorial, id=editorialid)
+            editorial.is_active = False
+            editorial.save()
+            return JsonResponse({"success": True})
+        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
+    
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+@login_required(login_url='/app_biblioteca/login/')
+def delete_genre(request):
+    if request.method == "POST":
+        genreid = request.POST.get("genreid", None)
+        if genreid:
+            genre = get_object_or_404(Genre, id=genreid)
+            genre.is_active = False
+            genre.save()
+            return JsonResponse({"success": True})
+        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
+    
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+@login_required(login_url='/app_biblioteca/login/')
+def delete_language(request):
+    if request.method == "POST":
+        languageid = request.POST.get("languageid", None)
+        if languageid:
+            language = get_object_or_404(Language, id=languageid)
+            language.is_active = False
+            language.save()
+            return JsonResponse({"success": True})
+        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
+    
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
 def createBook(request):
    if request.method == 'POST':
       book_form = BookForm(request.POST)
@@ -168,82 +238,3 @@ def editLending(request, id):
       error = e
       lending = None
    return render(request, 'editLending.html', {'lending_form': lending_form, 'error':error, 'lending': lending})
-=======
-@login_required(login_url='/app_biblioteca/login/')
-def delete_lending(request):
-    if request.method == "POST":
-        lendingid = request.POST.get("lendingid", None)
-        if lendingid:
-            lending = get_object_or_404(Lending, id=lendingid)
-            lending.is_active = False
-            lending.save()
-            return JsonResponse({"success": True})
-        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
-    
-    return JsonResponse({"success": False, "error": "Método no permitido"})
-
-@login_required(login_url='/app_biblioteca/login/')
-def delete_reader(request):
-    if request.method == "POST":
-        readerid = request.POST.get("readerid", None)
-        if readerid:
-            reader = get_object_or_404(Reader, id=readerid)
-            reader.is_active = False
-            reader.save()
-            return JsonResponse({"success": True})
-        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
-    
-    return JsonResponse({"success": False, "error": "Método no permitido"})
-
-@login_required(login_url='/app_biblioteca/login/')
-def delete_book(request):
-    if request.method == "POST":
-        bookid = request.POST.get("bookid", None)
-        if bookid:
-            book = get_object_or_404(Book, id=bookid)
-            book.is_active = False
-            book.save()
-            return JsonResponse({"success": True})
-        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
-    
-    return JsonResponse({"success": False, "error": "Método no permitido"})
-
-@login_required(login_url='/app_biblioteca/login/')
-def delete_editorial(request):
-    if request.method == "POST":
-        editorialid = request.POST.get("editorialid", None)
-        if editorialid:
-            editorial = get_object_or_404(Editorial, id=editorialid)
-            editorial.is_active = False
-            editorial.save()
-            return JsonResponse({"success": True})
-        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
-    
-    return JsonResponse({"success": False, "error": "Método no permitido"})
-
-@login_required(login_url='/app_biblioteca/login/')
-def delete_genre(request):
-    if request.method == "POST":
-        genreid = request.POST.get("genreid", None)
-        if genreid:
-            genre = get_object_or_404(Genre, id=genreid)
-            genre.is_active = False
-            genre.save()
-            return JsonResponse({"success": True})
-        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
-    
-    return JsonResponse({"success": False, "error": "Método no permitido"})
-
-@login_required(login_url='/app_biblioteca/login/')
-def delete_language(request):
-    if request.method == "POST":
-        languageid = request.POST.get("languageid", None)
-        if languageid:
-            language = get_object_or_404(Language, id=languageid)
-            language.is_active = False
-            language.save()
-            return JsonResponse({"success": True})
-        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
-    
-    return JsonResponse({"success": False, "error": "Método no permitido"})
->>>>>>> 205892282ee1e232723eff01ed201c0728804e50
