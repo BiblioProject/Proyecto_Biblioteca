@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editoriales</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}?v=3">
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+</head>
+<body>
+    {% block content %}
+    {% include 'partials/topbar.html' %}    
+    <div class="page-header d-flex align-items-center justify-content-between">
+        <h2>Editoriales</h2>
+        <span id="addeditorial" class="act-btn text-primary" title="Agregar Editorial" style="cursor: pointer; font-size: 25px;">
+            <i class="bi bi-plus-circle-fill fs-l"></i>
+        </span>
+    </div>
+    <div class="table-responsive mt-3">
+        <table class="table table-bordered table-hover text-center align-middle bg-white">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for editorial in page_obj %}
+                <tr data-editorialid="{{ editorial.id }}">
+                    <td>{{ editorial.id }}</td>
+                    <td>{{ editorial.name }}</td>
+                    <td>
+                        <span class="act-btn delete-editorial text-danger" title="Borrar Editorial" style="cursor: pointer; font-size:25px;">
+                            <i class="bi bi-trash3-fill fs-5"></i>
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% include 'partials/pagination.html' %}
+    </div>
+    {% endblock %}
+</body>
+</html>
+
+<script type="text/javascript">
+    document.querySelectorAll(".delete-editorial").forEach((btn) => {
+        btn.onclick = function() {
+            delete_editorial(this.closest("tr").dataset.editorialid);
+        };
+    });
+
+    function delete_editorial(editorialid) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "{% url 'delete_editorial' %}", true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        window.location.reload();
+                    } else {
+                        console.error("Error:", response.error);
+                    }
+                } else {
+                    console.error("Error en la solicitud:", xhr.status);
+                }
+            }
+        };
+        
+        xhr.send("editorialid=" + editorialid);
+    }
+</script>

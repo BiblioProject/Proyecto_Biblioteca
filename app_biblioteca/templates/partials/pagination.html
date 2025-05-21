@@ -1,0 +1,15 @@
+<div class="d-flex justify-content-between align-items-center w-100">
+    <div class="ms-auto">
+        <span class="mx-2">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    </div>
+    <div class="pagination mt-3 d-flex align-items-center">
+        {% if page_obj.has_previous %}
+            <a href="?page=1" class="btn btn-link text-primary">Primera</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-link text-primary">Anterior</a>
+        {% endif %}
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-link text-primary">Siguiente</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-link text-primary">Última</a>
+        {% endif %}
+    </div>
+</div>

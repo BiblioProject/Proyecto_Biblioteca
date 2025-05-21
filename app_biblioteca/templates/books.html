@@ -7,36 +7,18 @@
     <title>Libros</title>
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-icons.css' %}">
+<<<<<<< HEAD
     <link rel="stylesheet" href="{% static 'css/main.css' %}?v=1">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+=======
+    <link rel="stylesheet" href="{% static 'css/main.css' %}?v=2">
+>>>>>>> 205892282ee1e232723eff01ed201c0728804e50
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 </head>
 <body>
     {% block content %}
-    <div class="top-bar px-3 py-2 border-bottom">
-        <div class="d-flex justify-content-between align-items-center w-100">
-            <!-- Sección izquierda: enlaces -->
-            <div class="d-flex align-items-center">
-                <a href="{% url 'books' %}" class="nav-link"><i class="bi bi-book"></i> Libros</a>
-                <a href="{% url 'readers' %}" class="nav-link"><i class="bi bi-people"></i> Lectores</a>
-                <a href="{% url 'main' %}" class="nav-link"><i class="bi bi-journal-arrow-down"></i> Préstamos</a>
-            </div>
-    
-            <!-- Sección derecha: usuario y logout -->
-            <div class="d-flex align-items-center">
-                <div class="user-info">
-                    <span class="fw-bold">{{ user.first_name }} {{ user.last_name }}</span>
-                    <form action="{% url 'logout' %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-danger btn-sm">
-                            <i class="bi bi-box-arrow-right"></i> Logout
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include 'partials/topbar.html' %}
     <div class="page-header d-flex align-items-center justify-content-between">
         <h2>Libros</h2>
         <!--<span id="addbook" class="act-btn text-primary" title="Agregar Libro" style="cursor: pointer; font-size: 25px;">
@@ -61,18 +43,34 @@
                     <th>Editorial</th>
                     <th>Idioma</th>
                     <th>Género</th>
-                    <th>Acciones</th>
+                    <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
-                {% for book in books %}
+                {% for book in page_obj %}
                 <tr data-bookid="{{ book.id }}">
                     <td>{{ book.id }}</td>
                     <td>{{ book.title }}</td>
                     <td>{{ book.author }}</td>
                     <td>{{ book.publication_year }}</td>
-                    <td>{{ book.pages }}</td>
-                    <td>{{ book.description }}</td>
+                    <td>
+                        {% if book.pages %}
+                            {{ book.pages }}
+                        {% else %}
+                            Sin especificar
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if book.description %}
+                            <span class="preview">
+                                {{ book.description|slice:":100" }}{% if book.description|length > 100 %}<span class="ellipsis">…</span>{% endif %}
+                            </span>
+                            <span class="hidden" style="display: none;">{{ book.description|slice:"100:" }}</span>
+                            <span class="expand-btn text-primary" style="cursor:pointer;">Ver más</span>
+                        {% else %}
+                            Sin especificar
+                        {% endif %}
+                    </td>
                     <td>{{ book.stock }}</td>
                     <td>{{ book.available }}</td>
                     <td>{{ book.editorial }}</td>
@@ -93,6 +91,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% include 'partials/pagination.html' %}
     </div>
     <div class="modal fade" id="creacion" role="dialog">
 
@@ -121,3 +120,53 @@
     {% endblock extrajs %}
 </body>
 </html>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".expand-btn").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const hiddenText = this.previousElementSibling;
+                const ellipsis = this.previousElementSibling.previousElementSibling.querySelector(".ellipsis");
+
+                if (hiddenText.style.display === "none" || hiddenText.style.display === "") {
+                    hiddenText.style.display = "inline";
+                    ellipsis.style.display = "none"; // Oculta los puntos suspensivos
+                    this.textContent = "Ver menos";
+                } else {
+                    hiddenText.style.display = "none";
+                    ellipsis.style.display = "inline"; // Muestra los puntos suspensivos nuevamente
+                    this.textContent = "Ver más";
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll(".delete-book").forEach((btn) => {
+        btn.onclick = function() {
+            delete_book(this.closest("tr").dataset.bookid);
+        };
+    });
+
+    function delete_book(bookid) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "{% url 'delete_book' %}", true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        window.location.reload();
+                    } else {
+                        console.error("Error:", response.error);
+                    }
+                } else {
+                    console.error("Error en la solicitud:", xhr.status);
+                }
+            }
+        };
+        
+        xhr.send("bookid=" + bookid);
+    }
+</script>

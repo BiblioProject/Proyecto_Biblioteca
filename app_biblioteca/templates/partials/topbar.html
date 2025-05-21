@@ -1,0 +1,26 @@
+<div class="top-bar px-3 py-2 border-bottom">
+    <div class="d-flex justify-content-between align-items-center w-100">
+        <!-- Sección izquierda: enlaces -->
+        <div class="d-flex align-items-center">
+            <a href="{% url 'books' %}" class="nav-link"><i class="bi bi-book"></i> Libros</a>
+            <a href="{% url 'readers' %}" class="nav-link"><i class="bi bi-people"></i> Lectores</a>
+            <a href="{% url 'main' %}" class="nav-link"><i class="bi bi-journal-arrow-down"></i> Préstamos</a>
+            <a href="{% url 'editorials' %}" class="nav-link"><i class="bi bi-building"></i> Editoriales</a>
+            <a href="{% url 'genres' %}" class="nav-link"><i class="bi bi-tags"></i> Géneros</a>
+            <a href="{% url 'languages' %}" class="nav-link"><i class="bi bi-translate"></i> Idiomas</a>
+        </div>
+
+        <!-- Sección derecha: usuario y logout -->
+        <div class="d-flex align-items-center">
+            <div class="user-info">
+                <span class="fw-bold"><i class="bi bi-person"></i> {{ user.first_name }} {{ user.last_name }}</span>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
