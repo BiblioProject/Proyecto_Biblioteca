@@ -31,7 +31,9 @@
             <tbody>
                 {% for editorial in page_obj %}
                 <tr data-editorialid="{{ editorial.id }}">
-                    <td>{{ editorial.id }}</td>
+                    <td class="clickable">
+                        <a href={% url 'books_editorial' editorialid=editorial.id %}>{{ editorial.id }}</a>
+                    </td>
                     <td>{{ editorial.name }}</td>
                     <td>
                         <span class="act-btn delete-editorial text-danger" title="Borrar Editorial" style="cursor: pointer; font-size:25px;">
