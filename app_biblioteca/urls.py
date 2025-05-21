@@ -28,10 +28,14 @@ urlpatterns = [
     path('languages/', views.languages_view, name='languages'),
     path(r'books_language/<int:languageid>/',views.books_language,name='books_language'), # libros desde idiomas
     path('delete_language/', views.delete_language, name='delete_language'),
+
+    # crear y editar libros, lectores y préstamos
     path('createBook/', views.createBook, name = 'create_book'),
     path('editBook/<int:id>', views.editBook, name = 'edit_book'),
+
     path('createReader/', views.createReader, name = 'create_reader'),
     path('editReader/<int:id>', views.editReader, name = 'edit_reader'),
+
     path('createLending/', views.createLending, name = 'create_lending'),
-    path('editLending/<int:id>', views.editLending, name = 'edit_lending')
+    path('editLending/<int:id>', views.editLending, name = 'edit_lending'),
 ]

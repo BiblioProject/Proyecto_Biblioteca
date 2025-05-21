@@ -17,9 +17,6 @@
     {% include 'partials/topbar.html' %}    
     <div class="page-header d-flex align-items-center justify-content-between">
         <h2>Préstamos</h2>
-        <!--<span id="addlending" class="act-btn text-primary" title="Agregar Préstamo" style="cursor: pointer; font-size: 25px;">
-            <i class="bi bi-plus-circle-fill fs-l"></i>
-        </span>-->
         <button class="btn btn-sm btn-outline-primary" title="Crear Préstamo" onclick="abrir_modal_creacion('{% url 'create_lending' %}')">
             <i class="bi bi-plus-circle-fill fs-l"></i>
         </button>
@@ -82,9 +79,6 @@
                         <span class="act-btn delete-lending text-danger" title="Borrar Préstamo" style="cursor: pointer; font-size:25px;">
                             <i class="bi bi-trash3-fill fs-5"></i>
                         </span>
-                        <!--<span class="act-btn edit-book text-secondary" title="Editar Libro" style="cursor: pointer; font-size:25px;">
-                            <i class="bi bi-pencil-square"></i>
-                        </span>-->
                         <button class="btn btn-sm btn-outline-secondary" title="Editar Préstamo" onclick="abrir_modal_edicion('{% url 'edit_lending' lending.id %}')">
                             <i class="bi bi-pencil-square"></i>
                         </button>

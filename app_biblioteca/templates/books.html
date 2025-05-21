@@ -19,9 +19,6 @@
     {% include 'partials/topbar.html' %}
     <div class="page-header d-flex align-items-center justify-content-between">
         <h2>Libros</h2>
-        <!--<span id="addbook" class="act-btn text-primary" title="Agregar Libro" style="cursor: pointer; font-size: 25px;">
-            <i class="bi bi-plus-circle-fill fs-l"></i>
-        </span>-->
         <button class="btn btn-sm btn-outline-primary" title="Crear Libro" onclick="abrir_modal_creacion('{% url 'create_book' %}')">
             <i class="bi bi-plus-circle-fill fs-l"></i>
         </button>
@@ -96,9 +93,6 @@
                         <span class="act-btn delete-book text-danger" title="Borrar Libro" style="cursor: pointer; font-size:25px;">
                             <i class="bi bi-trash3-fill fs-5"></i>
                         </span>
-                        <!--<span class="act-btn edit-book text-secondary" title="Editar Libro" style="cursor: pointer; font-size:25px;">
-                            <i class="bi bi-pencil-square"></i>
-                        </span>-->
                         <button class="btn btn-sm btn-outline-secondary" title="Editar Libro" onclick="abrir_modal_edicion('{% url 'edit_book' book.id %}')">
                             <i class="bi bi-pencil-square"></i>
                         </button>

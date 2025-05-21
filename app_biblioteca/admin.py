@@ -29,6 +29,6 @@ admin.site.register(Reader, ReaderAdmin)
 
 class LendingAdmin(admin.ModelAdmin):
     list_display = ('reader','book','date','state','is_active')
-    readonly_fields=('estimated_return_date','state','user')
+    readonly_fields=('estimated_return_date','state')
     
 admin.site.register(Lending, LendingAdmin)

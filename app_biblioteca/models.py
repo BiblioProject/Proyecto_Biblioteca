@@ -105,7 +105,7 @@ class Lending(models.Model):
 
     reader = models.ForeignKey(Reader, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    user=models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    # user=models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
     loan_term_days = models.IntegerField(default=7)
     daily_rate=models.DecimalField(max_digits=10, decimal_places=2, default=1.50)

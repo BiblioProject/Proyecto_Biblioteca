@@ -11,60 +11,6 @@ from django.shortcuts import get_object_or_404
 from .forms import BookForm, ReaderForm, LendingForm
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-@login_required(login_url='/app_biblioteca/login/')
-def main(request):
-   lendings=Lending.objects.filter(is_active=True)
-   paginator = Paginator(lendings, 7)  # 7 elementos por página
-   page_number = request.GET.get("page")
-   page_obj = paginator.get_page(page_number)
-
-   return render(request, 'lendings.html', {'page_obj': page_obj})  # Pasamos page_obj correctamente
-
-@login_required(login_url='/app_biblioteca/login/')
-def books_view(request):
-   books = Book.objects.filter(is_active=True)
-   paginator = Paginator(books, 5)  # 5 elementos por página
-   page_number = request.GET.get("page")
-   page_obj = paginator.get_page(page_number)
-
-   return render(request, 'books.html', {'page_obj': page_obj})  # Pasamos page_obj correctamente
-
-@login_required(login_url='/app_biblioteca/login/')
-def readers_view(request):
-   readers = Reader.objects.filter(is_active=True)
-   paginator = Paginator(readers, 7)  # 7 elementos por página
-   page_number = request.GET.get("page")
-   page_obj = paginator.get_page(page_number)
-
-   return render(request, 'readers.html', {'page_obj': page_obj})  # Pasamos page_obj correctamente
-
-@login_required(login_url='/app_biblioteca/login/')
-def editorials_view(request):
-   editorials = Editorial.objects.filter(is_active=True)
-   paginator = Paginator(editorials, 7)  # 7 elementos por página
-   page_number = request.GET.get("page")
-   page_obj = paginator.get_page(page_number)
-
-   return render(request, 'editorials.html', {'page_obj': page_obj})  # Pasamos page_obj correctamente
-
-@login_required(login_url='/app_biblioteca/login/')
-def genres_view(request):
-   genres = Genre.objects.filter(is_active=True)
-   paginator = Paginator(genres, 7)  # 7 elementos por página
-   page_number = request.GET.get("page")
-   page_obj = paginator.get_page(page_number)
-
-   return render(request, 'genres.html', {'page_obj': page_obj})  # Pasamos page_obj correctamente
-
-@login_required(login_url='/app_biblioteca/login/')
-def languages_view(request):
-   language = Language.objects.filter(is_active=True)
-   paginator = Paginator(language, 7)  # 7 elementos por página
-   page_number = request.GET.get("page")
-   page_obj = paginator.get_page(page_number)
-
-   return render(request, 'languages.html', {'page_obj': page_obj})  # Pasamos page_obj correctamente
-
 def login(request):
    args = {}
    return TemplateResponse(request, 'login.html', args)
