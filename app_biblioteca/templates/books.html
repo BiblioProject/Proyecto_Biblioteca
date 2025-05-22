@@ -19,9 +19,6 @@
     {% include 'partials/topbar.html' %}
     <div class="page-header d-flex align-items-center justify-content-between">
         <h2>Libros</h2>
-        <!--<span id="addbook" class="act-btn text-primary" title="Agregar Libro" style="cursor: pointer; font-size: 25px;">
-            <i class="bi bi-plus-circle-fill fs-l"></i>
-        </span>-->
         <button class="btn btn-sm btn-outline-primary" title="Crear Libro" onclick="abrir_modal_creacion('{% url 'create_book' %}')">
             <i class="bi bi-plus-circle-fill fs-l"></i>
         </button>
@@ -47,13 +44,21 @@
             <tbody>
                 {% for book in page_obj %}
                 <tr data-bookid="{{ book.id }}">
-                    <td>{{ book.id }}</td>
+                    <td class="clickable">
+                        <a href={% url 'lendings_book' bookid=book.id %}>{{ book.id }}</a>
+                    </td>
                     <td>{{ book.title }}</td>
                     <td>{{ book.author }}</td>
-                    <td>{{ book.publication_year }}</td>
+                    <td>
+                        <div class="rounded-pill bg-primary text-white p-1 px-3">
+                            {{ book.publication_year }}
+                        </div>
+                    </td>
                     <td>
                         {% if book.pages %}
-                            {{ book.pages }}
+                            <div class="rounded-pill bg-secondary text-white p-1">
+                                {{ book.pages }}
+                            </div>
                         {% else %}
                             Sin especificar
                         {% endif %}
@@ -70,7 +75,17 @@
                         {% endif %}
                     </td>
                     <td>{{ book.stock }}</td>
-                    <td>{{ book.available }}</td>
+                    <td>
+                        {% if book.available == book.stock %}
+                            <div class="text-success">
+                                {{ book.available }}
+                            </div>
+                        {% else %}
+                            <div class="text-danger">
+                                {{ book.available }}
+                            </div>
+                        {% endif %}
+                    </td>
                     <td>{{ book.editorial }}</td>
                     <td>{{ book.language }}</td>
                     <td>{{ book.genre }}</td>
@@ -78,9 +93,6 @@
                         <span class="act-btn delete-book text-danger" title="Borrar Libro" style="cursor: pointer; font-size:25px;">
                             <i class="bi bi-trash3-fill fs-5"></i>
                         </span>
-                        <!--<span class="act-btn edit-book text-secondary" title="Editar Libro" style="cursor: pointer; font-size:25px;">
-                            <i class="bi bi-pencil-square"></i>
-                        </span>-->
                         <button class="btn btn-sm btn-outline-secondary" title="Editar Libro" onclick="abrir_modal_edicion('{% url 'edit_book' book.id %}')">
                             <i class="bi bi-pencil-square"></i>
                         </button>

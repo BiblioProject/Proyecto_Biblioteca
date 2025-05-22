@@ -31,7 +31,9 @@
             <tbody>
                 {% for language in page_obj %}
                 <tr data-languageid="{{ language.id }}">
-                    <td>{{ language.id }}</td>
+                    <td class="clickable">
+                        <a href={% url 'books_language' languageid=language.id %}>{{ language.id }}</a>
+                    </td>
                     <td>{{ language.name }}</td>
                     <td>
                         <span class="act-btn delete-language text-danger" title="Borrar Idioma" style="cursor: pointer; font-size:25px;">
