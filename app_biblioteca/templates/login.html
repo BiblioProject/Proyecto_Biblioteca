@@ -27,8 +27,9 @@
                 <input type="password" class="form-control" id="password" name="password" placeholder="Ingrese su clave"
                     required>
             </div>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-success">Ingresar</button>
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-success mb-2 w-50">Ingresar</button>
+                <a href="{% url 'pin_login' %}" class="btn btn-primary w-50">Ingrese con PIN</a>
             </div>
         </form>
     </div>

@@ -85,6 +85,10 @@ class Reader(models.Model):
     sanction_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     
     is_active = models.BooleanField(default=True)
+    pin = models.CharField(max_length=6, blank=True, null=True)  # <-- NUEVO CAMPO
+
+    def __str__(self):
+        return self.name
 
     def clean(self):
         if self.sanctions < 0:
@@ -184,3 +188,5 @@ class Lending(models.Model):
 
     def __str__(self):
         return f"{self.reader.name} - {self.book.title}"
+    
+    

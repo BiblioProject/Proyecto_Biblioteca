@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio de sesión con PIN</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <style>
+        body {
+            background: #f8fafc;
+        }
+        .pin-card {
+            max-width: 400px;
+            margin: 60px auto;
+            padding: 2rem 2.5rem 2rem 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="pin-card">
+        <div class="text-center mb-4">
+            <h3>Inicio de sesión con PIN</h3>
+            <p class="text-muted mb-0">Ingresa tu ID de lector y tu PIN</p>
+        </div>
+        <form method="post" autocomplete="off">
+            {% csrf_token %}
+            <div class="mb-3 row align-items-center">
+                <label for="{{ form.reader_id.id_for_label }}" class="col-sm-5 col-form-label text-end">ID de lector</label>
+                <div class="col-sm-7">
+                    {{ form.reader_id }}
+                </div>
+            </div>
+            <div class="mb-3 row align-items-center">
+                <label for="{{ form.pin.id_for_label }}" class="col-sm-5 col-form-label text-end">PIN</label>
+                <div class="col-sm-7">
+                    {{ form.pin }}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mb-2">Entrar</button>
+            <a href="/app_biblioteca/login/" class="btn btn-link w-100">Volver al login normal</a>
+        </form>
+        {% if messages %}
+            <div class="alert alert-danger mt-3 mb-0 py-2 text-center" role="alert">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

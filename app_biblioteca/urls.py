@@ -38,4 +38,6 @@ urlpatterns = [
 
     path('createLending/', views.createLending, name = 'create_lending'),
     path('editLending/<int:id>', views.editLending, name = 'edit_lending'),
+
+    path('pin-login/', views.pin_login, name='pin_login'),
 ]
