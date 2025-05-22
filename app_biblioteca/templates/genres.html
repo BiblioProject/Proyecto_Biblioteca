@@ -5,14 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Géneros</title>
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'css/main.css' %}?v=3">
-    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 </head>
 <body>
     {% block content %}
-    {% include 'partials/topbar.html' %}    
+    {% include 'partials/topbar.html' %}
     <div class="page-header d-flex align-items-center justify-content-between">
         <h2>Géneros</h2>
         <span id="addgenre" class="act-btn text-primary" title="Agregar Género" style="cursor: pointer; font-size: 25px;">
@@ -32,7 +32,7 @@
                 {% for genre in page_obj %}
                 <tr data-genreid="{{ genre.id }}">
                     <td class="clickable">
-                        <a href={% url 'books_genre' genreid=genre.id %}>{{ genre.id }}</a>
+                        <a href="{% url 'books_genre' genreid=genre.id %}">{{ genre.id }}</a>
                     </td>
                     <td>{{ genre.name }}</td>
                     <td>
@@ -47,37 +47,84 @@
         {% include 'partials/pagination.html' %}
     </div>
     {% endblock %}
+
+    <!-- Modal para agregar género (fuera del bloque content) -->
+    <div class="modal fade" id="addGenreModal" tabindex="-1" role="dialog" aria-labelledby="addGenreModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <form id="addGenreForm" method="post">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addGenreModalLabel">Agregar Género</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="genreName" class="form-label">Nombre del género</label>
+                <input type="text" class="form-control" id="genreName" name="name" required>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Agregar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery y Bootstrap 4 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            // Para abrir el modal
+            $("#addgenre").click(function() {
+                $("#addGenreModal").modal("show");
+            });
+
+            // Para eliminar género
+            $(".delete-genre").click(function() {
+                var genreid = $(this).closest("tr").data("genreid");
+                if(confirm("¿Estás seguro de eliminar este género?")) {
+                    $.ajax({
+                        url: "{% url 'delete_genre' %}",
+                        method: "POST",
+                        data: {
+                            genreid: genreid,
+                            csrfmiddlewaretoken: "{{ csrf_token }}"
+                        },
+                        success: function(response) {
+                            if(response.success) {
+                                location.reload();
+                            } else {
+                                alert("Error: " + response.error);
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Para enviar el formulario
+            $("#addGenreForm").submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "{% url 'add_genre' %}",
+                    method: "POST",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if(response.success) {
+                            $("#addGenreModal").modal("hide");
+                            location.reload();
+                        } else {
+                            alert("Error: " + response.error);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
-
-<script type="text/javascript">
-    document.querySelectorAll(".delete-genre").forEach((btn) => {
-        btn.onclick = function() {
-            delete_genre(this.closest("tr").dataset.genreid);
-        };
-    });
-
-    function delete_genre(genreid) {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "{% url 'delete_genre' %}", true);
-        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-        
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) {
-                if (xhr.status == 200) {
-                    const response = JSON.parse(xhr.responseText);
-                    if (response.success) {
-                        window.location.reload();
-                    } else {
-                        console.error("Error:", response.error);
-                    }
-                } else {
-                    console.error("Error en la solicitud:", xhr.status);
-                }
-            }
-        };
-        
-        xhr.send("genreid=" + genreid);
-    }
-</script>

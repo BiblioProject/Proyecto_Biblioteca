@@ -10,33 +10,66 @@
             background: #f8fafc;
         }
         .pin-card {
-            max-width: 400px;
-            margin: 60px auto;
-            padding: 2rem 2.5rem 2rem 2.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+            max-width: 360px;
+            margin: 50px auto;
+            padding: 1.5rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 0 15px rgba(0,0,0,0.06);
             background: #fff;
+        }
+        .pin-card h3 {
+            font-size: 1.3rem;
+        }
+        .pin-card p {
+            font-size: 0.85rem;
+        }
+        .pin-input {
+            letter-spacing: 0.4em;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        .num-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 180px;
+            margin: 0 auto;
+        }
+        .num-pad .btn {
+            width: 100%;
+            height: 48px;
+            font-size: 1rem;
+            padding: 0;
+        }
+        .reader-id-input {
+            max-width: 180px;
         }
     </style>
 </head>
 <body>
     <div class="pin-card">
-        <div class="text-center mb-4">
+        <div class="text-center mb-3">
             <h3>Inicio de sesión con PIN</h3>
             <p class="text-muted mb-0">Ingresa tu ID de lector y tu PIN</p>
         </div>
         <form method="post" autocomplete="off">
             {% csrf_token %}
-            <div class="mb-3 row align-items-center">
-                <label for="{{ form.reader_id.id_for_label }}" class="col-sm-5 col-form-label text-end">ID de lector</label>
-                <div class="col-sm-7">
+            <div class="mb-4 text-center">
+                <label for="{{ form.reader_id.id_for_label }}" class="form-label d-block mb-2">ID de lector</label>
+                <div class="reader-id-input mx-auto">
                     {{ form.reader_id }}
                 </div>
             </div>
-            <div class="mb-3 row align-items-center">
-                <label for="{{ form.pin.id_for_label }}" class="col-sm-5 col-form-label text-end">PIN</label>
-                <div class="col-sm-7">
-                    {{ form.pin }}
+            <div class="mb-4 text-center">
+                <label for="pin" class="form-label d-block mb-2">PIN</label>
+                <input type="password" id="pin" name="pin" maxlength="6" class="form-control pin-input mb-3 mx-auto" style="width: 180px;" readonly required>
+                <div class="num-pad">
+                    {% for n in "123456789" %}
+                    <button type="button" class="btn btn-outline-primary" onclick="addPin('{{ n }}')">{{ n }}</button>
+                    {% endfor %}
+                    <button type="button" class="btn btn-outline-secondary" onclick="delPin()">&larr;</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="addPin('0')">0</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="clearPin()">C</button>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary w-100 mb-2">Entrar</button>
@@ -50,5 +83,18 @@
             </div>
         {% endif %}
     </div>
+    <script>
+        function addPin(num) {
+            const pinInput = document.getElementById('pin');
+            if (pinInput.value.length < 6) pinInput.value += num;
+        }
+        function delPin() {
+            const pinInput = document.getElementById('pin');
+            pinInput.value = pinInput.value.slice(0, -1);
+        }
+        function clearPin() {
+            document.getElementById('pin').value = '';
+        }
+    </script>
 </body>
 </html>

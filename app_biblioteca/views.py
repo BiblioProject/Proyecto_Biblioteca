@@ -12,6 +12,9 @@ from .forms import BookForm, ReaderForm, LendingForm
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from .forms import PinLoginForm
 
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+
 def login(request):
    args = {}
    return TemplateResponse(request, 'login.html', args)
@@ -148,6 +151,20 @@ def delete_genre(request):
 @login_required(login_url='/app_biblioteca/login/')
 def delete_language(request):
     return delete_object(request, Language, "languageid")
+
+
+@csrf_exempt
+def add_genre(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        if name:
+            from .models import Genre
+            genre = Genre.objects.create(name=name, is_active=True)
+            return JsonResponse({"success": True, "id": genre.id, "name": genre.name})
+        else:
+            return JsonResponse({"success": False, "error": "Nombre requerido"})
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
 
 def createBook(request):
    if request.method == 'POST':
