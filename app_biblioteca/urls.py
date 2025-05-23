@@ -40,5 +40,15 @@ urlpatterns = [
     path('createLending/', views.createLending, name = 'create_lending'),
     path('editLending/<int:id>', views.editLending, name = 'edit_lending'),
 
+    path('createLanguage/', views.createLanguage, name='create_language'),
+    path('editLanguage/<int:id>', views.editLanguage, name = 'edit_language'),
+
+    path('createEditorial/', views.createEditorial, name='create_editorial'),
+    path('editEditorial/<int:id>', views.editEditorial, name = 'edit_editorial'),
+
+    path('createGenre/', views.createGenre, name='create_genre'),
+    path('editGenre/<int:id>', views.editGenre, name = 'edit_genre'),
+
     path('pin-login/', views.pin_login, name='pin_login'),  
+
 ]

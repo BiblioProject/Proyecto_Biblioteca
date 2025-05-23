@@ -8,7 +8,7 @@ from django.conf import settings
 import glob,os, json
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from .forms import BookForm, ReaderForm, LendingForm
+from .forms import BookForm, ReaderForm, LendingForm, LanguageForm, EditorialForm, GenreForm
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from .forms import PinLoginForm
 
@@ -224,6 +224,8 @@ def createLending(request):
    if request.method == 'POST':
       lending_form = LendingForm(request.POST)
       if lending_form.is_valid():
+         lending = lending_form.save(commit=False)
+         lending.user = request.user
          lending_form.save()
          return redirect('main')
    else:
@@ -246,3 +248,84 @@ def editLending(request, id):
       error = e
       lending = None
    return render(request, 'editLending.html', {'lending_form': lending_form, 'error':error, 'lending': lending})
+
+def createLanguage(request):
+   if request.method == 'POST':
+      language_form = LanguageForm(request.POST)
+      if language_form.is_valid():
+         language_form.save()
+         return redirect('languages')
+   else:
+      language_form = LanguageForm()
+   return render(request, 'createLanguage.html',{'language_form':language_form})
+
+def editLanguage(request, id):
+   language_form = None
+   error = None
+   try:
+      language = Language.objects.get(id = id)
+      if request.method == 'GET':
+         language_form = LanguageForm(instance = language)
+      else:
+         language_form = LanguageForm(request.POST, instance = language)
+         if language_form.is_valid():
+               language_form.save()
+         return redirect('languages')
+   except ObjectDoesNotExist as e: 
+      error = e
+      language = None
+   return render(request, 'editLanguage.html', {'language_form': language_form, 'error':error, 'language': language})
+
+def createEditorial(request):
+   if request.method == 'POST':
+      editorial_form = EditorialForm(request.POST)
+      if editorial_form.is_valid():
+         editorial_form.save()
+         return redirect('editorials')
+   else:
+      editorial_form = EditorialForm()
+   return render(request, 'createEditorial.html',{'editorial_form':editorial_form})
+
+def editEditorial(request, id):
+   editorial_form = None
+   error = None
+   try:
+      editorial = Editorial.objects.get(id = id)
+      if request.method == 'GET':
+         editorial_form = EditorialForm(instance = editorial)
+      else:
+         editorial_form = EditorialForm(request.POST, instance = editorial)
+         if editorial_form.is_valid():
+               editorial_form.save()
+         return redirect('editorials')
+   except ObjectDoesNotExist as e: 
+      error = e
+      editorial = None
+   return render(request, 'editEditorial.html', {'editorial_form': editorial_form, 'error':error, 'editorial': editorial})
+
+def createGenre(request):
+   if request.method == 'POST':
+      genre_form = GenreForm(request.POST)
+      if genre_form.is_valid():
+         genre_form.save()
+         return redirect('genres')
+   else:
+      genre_form = GenreForm()
+   return render(request, 'createGenre.html',{'genre_form':genre_form})
+
+def editGenre(request, id):
+   genre_form = None
+   error = None
+   try:
+      genre = Genre.objects.get(id = id)
+      if request.method == 'GET':
+         genre_form = GenreForm(instance = genre)
+      else:
+         genre_form = GenreForm(request.POST, instance = genre)
+         if genre_form.is_valid():
+               genre_form.save()
+         return redirect('genres')
+   except ObjectDoesNotExist as e: 
+      error = e
+      genre = None
+   return render(request, 'editGenre.html', {'genre_form': genre_form, 'error':error, 'genre': genre})

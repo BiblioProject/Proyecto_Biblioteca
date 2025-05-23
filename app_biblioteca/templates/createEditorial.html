@@ -1,23 +1,15 @@
 <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
         <div class="modal-header">
-            <h2 class="modal-title">Creación de Préstamo</h2>
+            <h2 class="modal-title">Creación de Editorial</h2>
             <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
-        <form action="{% url 'create_lending' %}" method="POST">
+        <form action="{% url 'create_editorial' %}" method="POST">
             {% csrf_token %}
             <div class="modal-body">
-                {% for field in lending_form %} {% if field.name != 'real_return_date' %}
-                <div class="form-group">
-                    {{ field.label_tag }} {{ field }} {% if field.errors %}
-                    <div class="text-danger small">
-                        {% for error in field.errors %} {{ error }}<br> {% endfor %}
-                    </div>
-                    {% endif %}
-                </div>
-                {% endif %} {% endfor %}
+                {{ editorial_form.as_p }}
             </div>
             <div class="modal-footer">
                 <button class="btn btn-danger" type="button" data-dismiss="modal">Cancelar</button>
