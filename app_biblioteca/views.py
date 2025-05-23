@@ -10,6 +10,10 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from .forms import BookForm, ReaderForm, LendingForm, LanguageForm, EditorialForm, GenreForm
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from .forms import PinLoginForm
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 def login(request):
    args = {}
@@ -25,6 +29,28 @@ def valida_user(request):
      else:
         messages.info(request, 'Credenciales incorrectas')
   return redirect('/app_biblioteca/')
+
+def pin_login(request):
+    if request.method == 'POST':
+        form = PinLoginForm(request.POST)
+        if form.is_valid():
+            reader_id = form.cleaned_data['reader_id']
+            pin = form.cleaned_data['pin']
+            try:
+                reader = Reader.objects.get(id=reader_id, pin=pin, is_active=True)
+                request.session['reader_id'] = reader.id
+                return redirect('main')  # O la vista principal de lectores
+            except Reader.DoesNotExist:
+                messages.error(request, "ID o PIN incorrecto.")
+    else:
+        form = PinLoginForm()
+    return render(request, 'pin_login.html', {'form': form})
+
+def vista_para_lectores(request):
+    if not request.session.get('reader_id'):
+        return redirect('pin_login')
+    
+
 
 # Función genérica para listar objetos con paginación: Puede filtrar por un campo específico si se proporciona `filter_field` y `filter_value`.
 @login_required(login_url='/app_biblioteca/login/')
@@ -125,6 +151,20 @@ def delete_genre(request):
 @login_required(login_url='/app_biblioteca/login/')
 def delete_language(request):
     return delete_object(request, Language, "languageid")
+
+
+@csrf_exempt
+def add_genre(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        if name:
+            from .models import Genre
+            genre = Genre.objects.create(name=name, is_active=True)
+            return JsonResponse({"success": True, "id": genre.id, "name": genre.name})
+        else:
+            return JsonResponse({"success": False, "error": "Nombre requerido"})
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
 
 def createBook(request):
    if request.method == 'POST':
