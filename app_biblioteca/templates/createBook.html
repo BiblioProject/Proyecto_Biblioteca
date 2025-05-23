@@ -62,7 +62,7 @@
                 <div class="form-group ">
                     {{ book_form.available.label_tag }} {{ book_form.available }}
                     <div class="invalid-feedback ">
-                        El número de disponibles no puede ser mayor que el stock total.
+                        El número de disponibles es inválido.
                     </div>
                 </div>
 
@@ -99,7 +99,7 @@
                 return true;
             }
 
-            if (available > stock) {
+            if (available > stock || available < 0) {
                 availableInput.classList.add('is-invalid');
                 return false;
             } else {

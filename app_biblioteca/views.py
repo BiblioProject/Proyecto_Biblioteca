@@ -184,6 +184,8 @@ def createLending(request):
    if request.method == 'POST':
       lending_form = LendingForm(request.POST)
       if lending_form.is_valid():
+         lending = lending_form.save(commit=False)
+         lending.user = request.user
          lending_form.save()
          return redirect('main')
    else:

@@ -118,6 +118,7 @@ class LendingForm(forms.ModelForm):
     class Meta:
         model = Lending
         fields = ['reader', 'book', 'date', 'estimated_return_date', 'real_return_date']
+        exclude = ['user']
         labels = {
             'reader': 'Lector',
             'book': 'Libro',
