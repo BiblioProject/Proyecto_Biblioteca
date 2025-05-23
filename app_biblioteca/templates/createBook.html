@@ -23,11 +23,30 @@
                 </div>
                 {% endif %}
 
-                <!-- Renderizar todos los campos excepto stock y disponibles -->
-                {% for field in book_form %} {% if field.name != 'stock' and field.name != 'available' %}
+                <!-- Campo: Título -->
                 <div class="form-group">
+                    {{ book_form.title.label_tag }} {{ book_form.title }}
+                </div>
+
+                <!-- Campo: Autor -->
+                <div class="form-group">
+                    {{ book_form.author.label_tag }} {{ book_form.author }}
+                </div>
+
+                <!-- Campo: Año de publicación (con validación visual) -->
+                <div class="form-group">
+                    {{ book_form.publication_year.label_tag }} {{ book_form.publication_year }}
+                    <div class="invalid-feedback" id="year-error-message">
+
+                    </div>
+                </div>
+
+
+                <!-- Renderizar todos los campos excepto titulo, autor, año de publicación y disponibles -->
+                {% for field in book_form %} {% if field.name != 'title' and field.name != 'author' and field.name != 'publication_year' and field.name != 'stock' and field.name != 'available' %}
+                <div class=" form-group ">
                     {{ field.label_tag }} {{ field }} {% if field.errors %}
-                    <div class="text-danger small">
+                    <div class="text-danger small ">
                         {% for error in field.errors %} {{ error }}<br> {% endfor %}
                     </div>
                     {% endif %}
@@ -35,34 +54,41 @@
                 {% endif %} {% endfor %}
 
                 <!-- Campo: Stock -->
-                <div class="form-group">
+                <div class="form-group ">
                     {{ book_form.stock.label_tag }} {{ book_form.stock }}
                 </div>
 
                 <!-- Campo: Disponibles (con validación visual) -->
-                <div class="form-group">
+                <div class="form-group ">
                     {{ book_form.available.label_tag }} {{ book_form.available }}
-                    <div class="invalid-feedback">
+                    <div class="invalid-feedback ">
                         El número de disponibles no puede ser mayor que el stock total.
                     </div>
                 </div>
 
             </div>
 
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Confirmar</button>
+            <div class="modal-footer ">
+                <button class="btn btn-danger" type="button" data-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" type="submit">Confirmar</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- VALIDACIÓN DE STOCK/DISPONIBLES -->
+<!-- VALIDACIÓN DE AÑO DE PUBLICACIÓN + STOCK/DISPONIBLES -->
 <script>
     (function() {
         const stockInput = document.getElementById('id_stock');
         const availableInput = document.getElementById('id_available');
+        const publicationYearInput = document.getElementById('id_publication_year');
         const form = document.getElementById('book-form');
+
+        const yearErrorDiv = document.getElementById('year-error-message');
+        const currentYear = new Date().getFullYear();
+        if (yearErrorDiv) {
+            yearErrorDiv.innerText = `El año de publicación debe estar entre 1000 y ${currentYear}.`;
+        }
 
         function validateAvailable() {
             const stock = parseInt(stockInput.value);
@@ -82,13 +108,35 @@
             }
         }
 
+        function validatePublicationYear() {
+            const year = parseInt(publicationYearInput.value);
+
+            if (isNaN(year)) {
+                publicationYearInput.classList.remove('is-invalid');
+                return true;
+            }
+
+            if (year < 1000 || year > currentYear) {
+                publicationYearInput.classList.add('is-invalid');
+                return false;
+            } else {
+                publicationYearInput.classList.remove('is-invalid');
+                return true;
+            }
+        }
+
         stockInput.addEventListener('change', validateAvailable);
         availableInput.addEventListener('change', validateAvailable);
+        publicationYearInput.addEventListener('change', validatePublicationYear);
 
         form.addEventListener('submit', function(e) {
-            if (!validateAvailable()) {
+            const validAvailable = validateAvailable();
+            const validYear = validatePublicationYear();
+
+            if (!validAvailable || !validYear) {
                 e.preventDefault();
-                availableInput.focus();
+                if (!validYear) publicationYearInput.focus();
+                else availableInput.focus();
             }
         });
     })();

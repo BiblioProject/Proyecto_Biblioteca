@@ -23,8 +23,8 @@
                 </div>
                 {% endif %}
 
-                <!-- Renderiza los demás campos excepto los dos anteriores -->
-                {% for field in lending_form %} {% if field.name != 'date' and field.name != 'real_return_date' %}
+                <!-- Renderiza los demás campos excepto la fecha de retorno real -->
+                {% for field in lending_form %} {% if field.name != 'real_return_date' %}
                 <div class="form-group">
                     {{ field.label_tag }} {{ field }} {% if field.errors %}
                     <div class="text-danger small">
@@ -33,11 +33,6 @@
                     {% endif %}
                 </div>
                 {% endif %} {% endfor %}
-
-                <!-- Campo: Fecha de préstamo -->
-                <div class="form-group">
-                    {{ lending_form.date.label_tag }} {{ lending_form.date }}
-                </div>
 
                 <!-- Campo: Retorno real (con validación visual) -->
                 <div class="form-group">
