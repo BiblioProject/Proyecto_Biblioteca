@@ -5,20 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Géneros</title>
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'css/main.css' %}?v=3">
 
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-
 </head>
 <body>
     {% block content %}
-    {% include 'partials/topbar.html' %}
+    {% include 'partials/topbar.html' %}    
     <div class="page-header d-flex align-items-center justify-content-between">
         <h2>Géneros</h2>
         <button class="btn btn-sm btn-outline-primary" title="Crear Género" onclick="abrir_modal_creacion('{% url 'create_genre' %}')">
@@ -38,7 +35,7 @@
                 {% for genre in page_obj %}
                 <tr data-genreid="{{ genre.id }}">
                     <td class="clickable">
-                        <a href="{% url 'books_genre' genreid=genre.id %}">{{ genre.id }}</a>
+                        <a href={% url 'books_genre' genreid=genre.id %}>{{ genre.id }}</a>
                     </td>
                     <td>{{ genre.name }}</td>
                     <td>
@@ -82,3 +79,35 @@
     {% endblock extrajs %}
 </body>
 </html>
+
+<script type="text/javascript">
+    document.querySelectorAll(".delete-genre").forEach((btn) => {
+        btn.onclick = function() {
+            delete_genre(this.closest("tr").dataset.genreid);
+        };
+    });
+
+    function delete_genre(genreid) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "{% url 'delete_genre' %}", true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        window.location.reload();
+                    } else {
+                        console.error("Error:", response.error);
+                    }
+                } else {
+                    console.error("Error en la solicitud:", xhr.status);
+                }
+            }
+        };
+        
+        xhr.send("genreid=" + genreid);
+    }
+</script>
