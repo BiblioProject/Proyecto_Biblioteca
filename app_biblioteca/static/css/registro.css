@@ -1,0 +1,118 @@
+:root {
+    --color-primario: #4361ee;
+    --color-secundario: #3f37c9;
+    --color-texto: #2b2d42;
+    --color-fondo: #ffffff;
+    --color-borde: #e9ecef;
+}
+        
+body {
+    background-color: #f4f6f9;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+    padding: 15px;
+}
+
+.registro-container {
+    max-width: 450px;
+    width: 100%;
+}
+
+.registro-card {
+    background: var(--color-fondo);
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    padding: 1.8rem;
+    border: 1px solid var(--color-borde);
+}
+
+.registro-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.registro-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--color-primario), var(--color-secundario));
+    color: white;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.registro-title {
+    font-weight: 700;
+    color: var(--color-texto);
+    margin-bottom: 0.3rem;
+    font-size: 1.5rem;
+}
+
+.registro-subtitle {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--color-texto);
+    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    border-radius: 6px;
+    border: 1px solid var(--color-borde);
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+ }
+
+.form-control:focus {
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+}
+
+.btn-registro {
+    background: linear-gradient(135deg, var(--color-primario), var(--color-secundario));
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    padding: 0.6rem;
+    font-size: 0.9rem;
+}
+
+.login-link {
+    display: block;
+    text-align: center;
+    margin-top: 1rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.login-link:hover {
+     color: var(--color-primario);
+}
+
+.text-error {
+    font-size: 0.75rem;
+}
+
+.form-text {
+    font-size: 0.75rem;
+    margin-top: 0.2rem;
+}
+
+.requisitos-contraseña {
+    padding-left: 1.2rem;
+    margin: 0.3rem 0;
+}
+        
+.requisitos-contraseña li {
+    margin-bottom: 0.2rem;
+}

@@ -10,6 +10,25 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from .forms import BookForm, ReaderForm, LendingForm, LanguageForm, EditorialForm, GenreForm
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.shortcuts import render, redirect
+from .forms import RegistroUsuarioForm
+from django.contrib.auth import logout as auth_logout
+from django.shortcuts import redirect
+
+def logout(request):
+    auth_logout(request)
+    return redirect('login')
+
+def registro_usuario(request):
+    if request.method == 'POST':
+        form = RegistroUsuarioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = RegistroUsuarioForm()
+    return render(request, 'registro.html', {'form': form})
+
 
 def login(request):
    args = {}
@@ -43,6 +62,7 @@ def list_objects(request, model, template, filter_field=None, filter_value=None,
 @login_required(login_url='/app_biblioteca/login/')
 def books_view(request):
     return list_objects(request, Book, 'books.html', per_page=5)
+
 
 @login_required(login_url='/app_biblioteca/login/')
 def main(request):
