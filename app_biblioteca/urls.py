@@ -24,7 +24,6 @@ urlpatterns = [
     path('genres/', views.genres_view, name='genres'),
     path(r'books_genre/<int:genreid>/',views.books_genre,name='books_genre'), # libros desde género
     path('delete_genre/', views.delete_genre, name='delete_genre'),
-    path('add_genre/', views.add_genre, name='add_genre'),  # <-- AGREGADO AQUÍ
 
     path('languages/', views.languages_view, name='languages'),
     path(r'books_language/<int:languageid>/',views.books_language,name='books_language'), # libros desde idiomas
@@ -48,7 +47,4 @@ urlpatterns = [
 
     path('createGenre/', views.createGenre, name='create_genre'),
     path('editGenre/<int:id>', views.editGenre, name = 'edit_genre'),
-
-    path('pin-login/', views.pin_login, name='pin_login'),  
-
 ]

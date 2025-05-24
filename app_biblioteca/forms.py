@@ -64,10 +64,6 @@ class BookForm(forms.ModelForm):
                 attrs={'class': 'form-control', 'id': 'id_available', 'type': 'number'}
             ),
         }
-
-class PinLoginForm(forms.Form):
-    reader_id = forms.IntegerField(label="ID de lector")
-    pin = forms.CharField(label="PIN", widget=forms.PasswordInput, max_length=6)
         
 class ReaderForm(forms.ModelForm):
     class Meta:
