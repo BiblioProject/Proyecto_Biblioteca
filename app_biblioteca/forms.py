@@ -2,6 +2,14 @@ from django import forms
 from .models import Book, Reader, Lending, Language, Genre, Editorial
 from django.utils.timezone import now
 from datetime import timedelta
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+
+
+class RegistroUsuarioForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
 
 class BookForm(forms.ModelForm):
     class Meta:

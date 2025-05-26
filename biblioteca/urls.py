@@ -23,6 +23,7 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(r'app_biblioteca/', include('app_biblioteca.urls')),
-    path('accounts/',include('django.contrib.auth.urls')),
+    # path('accounts/',include('django.contrib.auth.urls')),
     path(r'',views.main,name='main'),
+    path('logout/', views.logout, name='logout'),
 ]
