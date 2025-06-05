@@ -14,12 +14,15 @@
 </head>
 <body>
     {% block content %}
-    {% include 'partials/topbar.html' %}    
+    {% include 'partials/topbar.html' %}   
+    {% include 'partials/navbar.html' %}
+    <div class="main-content px-3">  
     <div class="page-header d-flex align-items-center justify-content-between">
         <h2>Préstamos</h2>
         <button class="btn btn-sm btn-outline-primary" title="Crear Préstamo" onclick="abrir_modal_creacion('{% url 'create_lending' %}')">
             <i class="bi bi-plus-circle-fill fs-l"></i>
         </button>
+    </div>
     </div>
     <div class="table-responsive mt-3">
         <table class="table table-bordered table-hover text-center align-middle bg-white">
