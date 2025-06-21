@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/registro.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
 </head>
 <body>
     <div class="registro-container">
@@ -21,7 +20,7 @@
                 <p class="registro-subtitle">Completa el formulario para crear tu cuenta</p>
             </div>
             
-            <form method="POST" action="{% url 'registro' %}" autocomplete="off">
+            <form method="POST" action="{% url 'registro' %}" autocomplete="off" id="registroForm">
                 {% csrf_token %}
                 
                 <!-- Nombre de usuario -->
@@ -85,5 +84,31 @@
             </div>
         </div>
     </div>
+    <script>
+    document.getElementById('registroForm').addEventListener('submit', function(event) {
+    var password1 = document.getElementById('id_password1').value;
+    var password2 = document.getElementById('id_password2').value;
+
+    // Validación: mínimo 8 caracteres
+    if (password1.length < 8) {
+        alert('La contraseña debe tener al menos 8 caracteres.');
+        event.preventDefault();
+        return;
+    }
+
+    // Validación: no completamente numérica
+    if (/^\d+$/.test(password1)) {
+        alert('La contraseña no puede ser completamente numérica.');
+        event.preventDefault();
+        return;
+    }
+
+    // Validación: contraseñas iguales
+    if (password1 !== password2) {
+        alert('Las contraseñas no coinciden.');
+        event.preventDefault();
+        return;
+    }
+});
+</script>
 </body>
-</html>
