@@ -1,0 +1,53 @@
+<div class="sidebar bg-white border-end position-fixed vh-100" id="sidebar" style="width: 220px; top: 56px; left: 0; z-index: 1020;">
+    <div class="sidebar-header py-4 px-3">
+        <h3 class="mb-0"><i class="bi bi-journal-bookmark"></i> Biblioteca</h3>
+    </div>
+    <ul class="nav flex-column px-2 mt-3">
+        <li class="nav-item">
+        <a href="{% url 'dashboard' %}" class="nav-link{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'books' %}" class="nav-link{% if request.resolver_match.url_name == 'books' %} active{% endif %}">
+                <i class="bi bi-book"></i> Libros
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'readers' %}" class="nav-link{% if request.resolver_match.url_name == 'readers' %} active{% endif %}">
+                <i class="bi bi-people"></i> Lectores
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'main' %}" class="nav-link{% if request.resolver_match.url_name == 'main' %} active{% endif %}">
+                <i class="bi bi-journal-arrow-down"></i> Préstamos
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'editorials' %}" class="nav-link{% if request.resolver_match.url_name == 'editorials' %} active{% endif %}">
+                <i class="bi bi-building"></i> Editoriales
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'genres' %}" class="nav-link{% if request.resolver_match.url_name == 'genres' %} active{% endif %}">
+                <i class="bi bi-tags"></i> Géneros
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'languages' %}" class="nav-link{% if request.resolver_match.url_name == 'languages' %} active{% endif %}">
+                <i class="bi bi-translate"></i> Idiomas
+            </a>
+        </li>
+    </ul>
+    <div class="sidebar-footer px-3 py-3 mt-5">
+        <div class="user-info mb-2 mt-1">
+            <span class="fw-bold"><i class="bi bi-person"></i> {{ user.first_name }} {{ user.last_name }}</span>
+        </div>
+        <form class="mt-3" action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+            </button>
+        </form>
+    </div>
+</div>

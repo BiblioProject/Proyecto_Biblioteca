@@ -1,0 +1,185 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Préstamos</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+</head>
+<body>
+    {% block content %}
+    {% include 'partials/sidebar.html' %}
+    {% include 'partials/topbar.html' %}
+    <div class="main-content px-3">  
+        <div class="page-header d-flex align-items-center justify-content-between">
+            <h2><i class="bi bi-journal-arrow-down"></i> Préstamos</h2>
+            <form method="get" class="d-flex" role="search">
+                <input class="form-control me-2 mx-3" type="search" placeholder="Buscar préstamos..." name="q" value="{{ request.GET.q }}">
+                <span class="act-btn create-lending text-primary" title="Crear Préstamo" style="cursor: pointer; font-size:25px;" onclick="abrir_modal_creacion('{% url 'create_lending' %}')">
+                    <i class="bi bi-plus-circle-fill fs-5"></i>
+                </span>
+            </form>            
+        </div>
+        {% if page_obj %}
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered table-hover text-center align-middle bg-white">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Lector</th>
+                        <th>Libro</th>
+                        <th>Fecha</th>
+                        <th>Retorno estimado</th>
+                        <th>Retorno real</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lending in page_obj %}
+                    <tr data-lendingid="{{ lending.id }}">
+                        <td>{{ lending.id }}</td>
+                        <td>{{ lending.reader }}</td>
+                        <td>{{ lending.book }}</td>
+                        <td>
+                            <div class="rounded-pill bg-primary text-white p-1">
+                                {{ lending.date }}
+                            </div>                    
+                        </td>
+                        <td>
+                            <div class="rounded-pill bg-secondary text-white p-1">
+                                {{ lending.estimated_return_date }}
+                            </div>    
+                        </td>
+                        <td>
+                            {% if lending.real_return_date %}
+                                {% if lending.state == 1 %}
+                                    <div class="rounded-pill bg-success text-white p-1">
+                                        {{ lending.real_return_date }}
+                                    </div>
+                                {% else %}
+                                    <div class="rounded-pill bg-danger text-white p-1">
+                                        {{ lending.real_return_date }}
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                            Sin especificar
+                            {% endif %}
+                        </td>                      
+                        <td>
+                            {% if lending.state == 0 %}
+                                <i class="bi bi-circle" style="color:blue;" title="Pendiente"></i>
+                            {% elif lending.state == 1 %}
+                                <i class="bi bi-check-circle-fill" style="color:green;" title="Devuelto"></i>
+                            {% else %}
+                                <i class="bi bi-x-circle-fill" style="color:red;" title="Atrasado"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="act-btn delete-lending text-danger" title="Borrar Préstamo" style="cursor: pointer; font-size:25px;">
+                                <i class="bi bi-trash3-fill fs-5"></i>
+                            </span>
+                            <span class="act-btn edit-lending text-secondary" title="Editar Préstamo" style="cursor: pointer; font-size:25px;" onclick="abrir_modal_edicion('{% url 'edit_lending' lending.id %}')">
+                                <i class="bi bi-pencil-square fs-5"></i>
+                            </span>                            
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% include 'partials/pagination.html' %}
+        </div>
+        {% else %}
+            <div class="alert alert-warning mt-4 text-center" role="alert">
+                No se encontraron préstamos{% if search_term %} que coincidan con tu búsqueda "<strong>{{ search_term }}</strong>"{% endif %}.
+            </div>
+        {% endif %}
+    </div>
+    <div class="modal fade" id="creacion" role="dialog"></div>
+    <div class="modal fade" id="edicion" role="dialog"></div>
+    {% endblock %}
+</body>
+</html>
+
+<script type="text/javascript">
+    // Códigos JS para que muestre el modal de edición y creación de Préstamos
+    var $ = jQuery.noConflict();
+
+    function abrir_modal_edicion(url) {
+        $('#edicion').load(url, function() {
+            $('#edicion').modal('show');
+        });
+    }
+
+    function abrir_modal_creacion(url) {
+        $('#creacion').load(url, function() {
+            $('#creacion').modal('show');
+        });
+    }
+
+    document.querySelectorAll(".delete-lending").forEach((btn) => {
+        btn.onclick = function() {
+            delete_lending(this.closest("tr").dataset.lendingid);
+        };
+    });
+
+    function delete_lending(lendingid) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "{% url 'delete_lending' %}", true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        window.location.reload();
+                    } else {
+                        console.error("Error:", response.error);
+                    }
+                } else {
+                    console.error("Error en la solicitud:", xhr.status);
+                }
+            }
+        };
+        
+        xhr.send("lendingid=" + lendingid);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById("menu-toggle");
+        const sidebar = document.getElementById("sidebar");
+        const body = document.body;
+
+        if (toggleBtn && sidebar) {
+            toggleBtn.addEventListener("click", function () {
+                const isHidden = sidebar.classList.toggle("d-none");
+
+                if (isHidden) {
+                    body.style.paddingLeft = "1rem";
+                } else {
+                    body.style.paddingLeft = "230px";
+                }
+
+                // Cambiar ícono del botón hamburguesa
+                const icon = toggleBtn.querySelector("i");
+                if (icon) {
+                    icon.classList.toggle("bi-list");
+                    icon.classList.toggle("bi-x");
+                }
+            });
+
+            // Al cargar, aplicar padding si el sidebar está visible
+            if (!sidebar.classList.contains("d-none")) {
+                body.style.paddingLeft = "230px";
+            }
+        }
+    });
+</script>

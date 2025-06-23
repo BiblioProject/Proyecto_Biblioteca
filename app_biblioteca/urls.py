@@ -2,8 +2,7 @@ from app_biblioteca import views
 from django.urls import path, include
 from . import views
 from django.contrib.auth import views as auth_views
-from .views import dashboard
-
+from .views import dashboard, CustomLoginView, CustomPasswordResetView, CustomPasswordResetDoneView, CustomPasswordResetConfirmView, CustomPasswordResetCompleteView
 
 urlpatterns = [
     path(r'', views.main, name='main'), # lendings
@@ -33,7 +32,7 @@ urlpatterns = [
     path(r'books_language/<int:languageid>/',views.books_language,name='books_language'), # libros desde idiomas
     path('delete_language/', views.delete_language, name='delete_language'),
 
-    # crear y editar libros, lectores y préstamos
+    # crear y editar libros, lectores, préstamos, etc.
     path('createBook/', views.createBook, name = 'create_book'),
     path('editBook/<int:id>', views.editBook, name = 'edit_book'),
 
@@ -52,10 +51,13 @@ urlpatterns = [
     path('createGenre/', views.createGenre, name='create_genre'),
     path('editGenre/<int:id>', views.editGenre, name = 'edit_genre'),
 
-    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='password_reset_form.html'), name='password_reset'),
-    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='password_reset_done.html'), name='password_reset_done'),
-    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'), name='password_reset_confirm'),
-    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password_reset_complete'),
+    # auth/password_reset
+    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='auth/password_reset_form.html'), name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='auth/password_reset_done.html'), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='auth/password_reset_confirm.html'), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='auth/password_reset_complete.html'), name='password_reset_complete'),
+
+    path("login/", CustomLoginView.as_view(), name="login"), # vista personalizada desde password_reset_form
 
     path('dashboard/', dashboard, name='dashboard'),
 ]
