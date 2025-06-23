@@ -32,6 +32,9 @@ urlpatterns = [
     path(r'books_language/<int:languageid>/',views.books_language,name='books_language'), # libros desde idiomas
     path('delete_language/', views.delete_language, name='delete_language'),
 
+    path('users/', views.users_view, name='users'),
+    path('delete_user/', views.delete_user, name='delete_user'),
+
     # crear y editar libros, lectores, préstamos, etc.
     path('createBook/', views.createBook, name = 'create_book'),
     path('editBook/<int:id>', views.editBook, name = 'edit_book'),
@@ -50,6 +53,8 @@ urlpatterns = [
 
     path('createGenre/', views.createGenre, name='create_genre'),
     path('editGenre/<int:id>', views.editGenre, name = 'edit_genre'),
+
+    path('editUser/<int:id>', views.editUser, name = 'edit_user'),
 
     # auth/password_reset
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='auth/password_reset_form.html'), name='password_reset'),

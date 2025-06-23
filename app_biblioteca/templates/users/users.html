@@ -1,0 +1,162 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+</head>
+<body>
+    {% block content %}
+    {% include 'partials/sidebar.html' %}
+    {% include 'partials/topbar.html' %}
+    <div class="main-content px-3">    
+        <div class="page-header d-flex align-items-center justify-content-between">
+            <h2><i class="bi bi-person-lines-fill"></i> Usuarios</h2>
+            <form method="get" class="d-flex" role="search">
+                <input class="form-control me-2 mx-3" type="search" placeholder="Buscar usuarios..." name="q" value="{{ request.GET.q }}">
+            </form>            
+        </div>
+        {% if page_obj %}
+        <div class="table-responsive mt-3">
+            <table class="table table-bordered table-hover text-center align-middle bg-white">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre de usuario</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Correo electrónico</th>
+                        <th>Fecha de registro</th>
+                        <th>Última conexión</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in page_obj %}
+                    <tr data-userid="{{ user.id }}">
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>
+                            {% if user.first_name %}
+                                {{ user.first_name }}
+                            {% else %}
+                                Sin especificar
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.last_name %}
+                                {{ user.last_name }}
+                            {% else %}
+                                Sin especificar
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="rounded-pill bg-primary text-white p-1">
+                                {{ user.email }}
+                            </div>
+                        </td>
+                        <td>{{ user.date_joined }}</td>
+                        <td>{{ user.last_login }}</td>
+                        <td>
+                            <span class="act-btn delete-user text-danger" title="Borrar Usuario" style="cursor: pointer; font-size:25px;">
+                                <i class="bi bi-trash3-fill fs-5"></i>
+                            </span>
+                            <span class="act-btn edit-user text-secondary" title="Editar Usuario" style="cursor: pointer; font-size:25px;" onclick="abrir_modal_edicion('{% url 'edit_user' user.id %}')">
+                                <i class="bi bi-pencil-square fs-5"></i>
+                            </span>                            
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% include 'partials/pagination.html' %}
+        </div>
+        {% else %}
+            <div class="alert alert-warning mt-4 text-center" role="alert">
+                No se encontraron usuarios{% if search_term %} que coincidan con tu búsqueda "<strong>{{ search_term }}</strong>"{% endif %}.
+            </div>
+        {% endif %}
+    </div>
+    <div class="modal fade" id="creacion" role="dialog"></div>
+    <div class="modal fade" id="edicion" role="dialog"></div>
+    {% endblock %}
+</body>
+</html>
+
+<script type="text/javascript">
+    // Códigos JS para que muestre el modal de edición y creación de idiomas
+    var $ = jQuery.noConflict();
+
+    function abrir_modal_edicion(url) {
+        $('#edicion').load(url, function() {
+            $('#edicion').modal('show');
+        });
+    }
+
+    document.querySelectorAll(".delete-user").forEach((btn) => {
+        btn.onclick = function() {
+            delete_user(this.closest("tr").dataset.userid);
+        };
+    });
+
+    function delete_user(userid) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "{% url 'delete_user' %}", true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        window.location.reload();
+                    } else {
+                        console.error("Error:", response.error);
+                    }
+                } else {
+                    console.error("Error en la solicitud:", xhr.status);
+                }
+            }
+        };
+        
+        xhr.send("userid=" + userid);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById("menu-toggle");
+        const sidebar = document.getElementById("sidebar");
+        const body = document.body;
+
+        if (toggleBtn && sidebar) {
+            toggleBtn.addEventListener("click", function () {
+                const isHidden = sidebar.classList.toggle("d-none");
+
+                if (isHidden) {
+                    body.style.paddingLeft = "1rem";
+                } else {
+                    body.style.paddingLeft = "230px";
+                }
+
+                // Cambiar ícono del botón hamburguesa
+                const icon = toggleBtn.querySelector("i");
+                if (icon) {
+                    icon.classList.toggle("bi-list");
+                    icon.classList.toggle("bi-x");
+                }
+            });
+
+            // Al cargar, aplicar padding si el sidebar está visible
+            if (!sidebar.classList.contains("d-none")) {
+                body.style.paddingLeft = "230px";
+            }
+        }
+    });
+</script>

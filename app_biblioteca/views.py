@@ -127,6 +127,10 @@ def genres_view(request):
 def languages_view(request):
    return list_objects(request, Language, 'languages/languages.html')
 
+@login_required(login_url='/app_biblioteca/login/')
+def users_view(request):
+   return list_objects(request, User, 'users/users.html')
+
 # Función para listar préstamos según libro
 @login_required(login_url='/app_biblioteca/login/')
 def lendings_book(request, bookid):
@@ -187,6 +191,10 @@ def delete_genre(request):
 @login_required(login_url='/app_biblioteca/login/')
 def delete_language(request):
    return delete_object(request, Language, "languageid")
+
+@login_required(login_url='/app_biblioteca/login/')
+def delete_user(request):
+   return delete_object(request, User, "userid")
 
 def createBook(request):
    if request.method == 'POST':
@@ -351,6 +359,33 @@ def editGenre(request, id):
       error = e
       genre = None
    return render(request, 'genres/modals/editGenre.html', {'genre_form': genre_form, 'error':error, 'genre': genre})
+
+def createUser(request):
+   if request.method == 'POST':
+      user_form = UserForm(request.POST)
+      if user_form.is_valid():
+         user_form.save()
+         return redirect('users')
+   else:
+      user_form = UserForm()
+   return render(request, 'users/modals/createUser.html',{'user_form':user_form})
+
+def editUser(request, id):
+   user_form = None
+   error = None
+   try:
+      user = User.objects.get(id = id)
+      if request.method == 'GET':
+         user_form = UserForm(instance = user)
+      else:
+         user_form = UserForm(request.POST, instance = user)
+         if user_form.is_valid():
+               user_form.save()
+         return redirect('users')
+   except ObjectDoesNotExist as e: 
+      error = e
+      user = None
+   return render(request, 'users/modals/editUser.html', {'user_form': user_form, 'error':error, 'user': user})
    
 @login_required(login_url='/app_biblioteca/login/')
 def dashboard(request):
