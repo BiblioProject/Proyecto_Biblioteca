@@ -129,7 +129,7 @@ def languages_view(request):
 
 @login_required(login_url='/app_biblioteca/login/')
 def users_view(request):
-   return list_objects(request, User, 'users/users.html')
+   return list_objects(request, User, 'users/users.html', per_page=5)
 
 # Función para listar préstamos según libro
 @login_required(login_url='/app_biblioteca/login/')
