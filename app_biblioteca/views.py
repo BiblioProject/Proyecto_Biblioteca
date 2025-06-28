@@ -18,6 +18,9 @@ from django.contrib.auth.models import User
 from django.db.models import Count, Q, CharField, TextField, IntegerField, FloatField, DecimalField, DateField, DateTimeField, ForeignKey
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.db.models.functions import Cast
+from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
+from django.contrib.auth.hashers import make_password
 
 class CustomLoginView(LoginView):
    template_name = "auth/login.html"
@@ -386,6 +389,55 @@ def editUser(request, id):
       error = e
       user = None
    return render(request, 'users/modals/editUser.html', {'user_form': user_form, 'error':error, 'user': user})
+
+def custom_password_reset(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = User.objects.get(email=email)
+            token = get_random_string(32)
+            request.session['password_reset_token'] = token
+            request.session['password_reset_user'] = user.pk
+            # Crea el enlace de recuperación
+            reset_link = request.build_absolute_uri(f'/app_biblioteca/reset_password/{token}/')
+            # Envía el correo
+            send_mail(
+                'Recupera tu contraseña',
+                f'Hola {user.username}, haz clic en el siguiente enlace para restablecer tu contraseña: {reset_link}',
+                None,
+                [email],
+            )
+            messages.success(request, 'Se ha enviado un enlace de recuperación a tu correo.')
+            return redirect('custom_password_reset')
+        except User.DoesNotExist:
+            messages.error(request, 'No existe un usuario con ese correo.')
+    return render(request, 'auth/custom_password_reset.html')
+
+def custom_password_reset_confirm(request, token):
+    session_token = request.session.get('password_reset_token')
+    user_id = request.session.get('password_reset_user')
+    if not session_token or session_token != token or not user_id:
+        return render(request, 'auth/custom_password_reset_invalid.html')
+
+    if request.method == 'POST':
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        if password1 != password2:
+            messages.error(request, 'Las contraseñas no coinciden.')
+        elif len(password1) < 8:
+            messages.error(request, 'La contraseña debe tener al menos 8 caracteres.')
+        elif password1.isdigit():
+            messages.error(request, 'La contraseña no puede ser completamente numérica.')
+        else:
+            user = User.objects.get(pk=user_id)
+            user.password = make_password(password1)
+            user.save()
+            # Limpia la sesión
+            del request.session['password_reset_token']
+            del request.session['password_reset_user']
+            messages.success(request, '¡Contraseña cambiada exitosamente! Ya puedes iniciar sesión.')
+            return redirect('login')
+    return render(request, 'auth/custom_password_reset_confirm.html')
    
 @login_required(login_url='/app_biblioteca/login/')
 def dashboard(request):
