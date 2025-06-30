@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,19 +13,18 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 </head>
+
 <body>
-    {% block content %}
-    {% include 'partials/sidebar.html' %}
-    {% include 'partials/topbar.html' %}
-    <div class="main-content px-3">    
+    {% block content %} {% include 'partials/sidebar.html' %} {% include 'partials/topbar.html' %}
+    <div class="main-content px-3">
         <div class="page-header d-flex align-items-center justify-content-between">
             <h2><i class="bi bi-building"></i> Editoriales</h2>
             <form method="get" class="d-flex" role="search">
-                <input class="form-control me-2 mx-3" type="search" placeholder="Buscar editoriales..." name="q" value="{{ request.GET.q }}"> 
+                <input class="form-control me-2 mx-3" type="search" placeholder="Buscar editoriales..." name="q" value="{{ request.GET.q }}">
                 <span class="act-btn create-editorial text-primary" title="Crear Editorial" style="cursor: pointer; font-size:25px;" onclick="abrir_modal_creacion('{% url 'create_editorial' %}')">
                     <i class="bi bi-plus-circle-fill fs-5"></i>
                 </span>
-            </form>            
+            </form>
         </div>
         {% if page_obj %}
         <div class="table-responsive mt-3">
@@ -49,7 +49,7 @@
                             </span>
                             <span class="act-btn edit-editorial text-secondary" title="Editar Editorial" style="cursor: pointer; font-size:25px;" onclick="abrir_modal_edicion('{% url 'edit_editorial' editorial.id %}')">
                                 <i class="bi bi-pencil-square fs-5"></i>
-                            </span>                            
+                            </span>
                         </td>
                     </tr>
                     {% endfor %}
@@ -58,15 +58,16 @@
             {% include 'partials/pagination.html' %}
         </div>
         {% else %}
-            <div class="alert alert-warning mt-4 text-center" role="alert">
-                No se encontraron editoriales{% if search_term %} que coincidan con tu búsqueda "<strong>{{ search_term }}</strong>"{% endif %}.
-            </div>
+        <div class="alert alert-warning mt-4 text-center" role="alert">
+            No se encontraron editoriales{% if search_term %} que coincidan con tu búsqueda "<strong>{{ search_term }}</strong>"{% endif %}.
+        </div>
         {% endif %}
     </div>
     <div class="modal fade" id="creacion" role="dialog"></div>
     <div class="modal fade" id="edicion" role="dialog"></div>
-    {% endblock %}
+    {% endblock %} {% include 'partials/modal_permiso.html' %}
 </body>
+
 </html>
 
 <script type="text/javascript">
@@ -74,15 +75,57 @@
     var $ = jQuery.noConflict();
 
     function abrir_modal_edicion(url) {
-        $('#edicion').load(url, function() {
-            $('#edicion').modal('show');
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(response) {
+                $('#edicion').html(response);
+                $('#edicion').modal('show');
+            },
+            error: function(xhr) {
+                if (xhr.status === 403) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        mostrarModalPermiso(response.error || "No tienes permisos.");
+                    } catch (e) {
+                        mostrarModalPermiso("No tienes permisos para esta acción.");
+                    }
+                } else {
+                    mostrarModalPermiso("Ocurrió un error al cargar el formulario.");
+                }
+            }
         });
     }
 
     function abrir_modal_creacion(url) {
-        $('#creacion').load(url, function() {
-            $('#creacion').modal('show');
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(response) {
+                $('#creacion').html(response);
+                $('#creacion').modal('show');
+            },
+            error: function(xhr) {
+                if (xhr.status === 403) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        mostrarModalPermiso(response.error || "No tienes permisos.");
+                    } catch (e) {
+                        mostrarModalPermiso("No tienes permisos para esta acción.");
+                    }
+                } else {
+                    mostrarModalPermiso("Ocurrió un error al cargar el formulario.");
+                }
+            }
         });
+    }
+
+
+    function mostrarModalPermiso(mensaje) {
+        const modalBody = document.getElementById("permisoModalBody");
+        modalBody.textContent = mensaje;
+        const modal = new bootstrap.Modal(document.getElementById("permisoModal"));
+        modal.show();
     }
 
     document.querySelectorAll(".delete-editorial").forEach((btn) => {
@@ -96,7 +139,7 @@
         xhr.open("POST", "{% url 'delete_editorial' %}", true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-        
+
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4) {
                 if (xhr.status == 200) {
@@ -104,24 +147,24 @@
                     if (response.success) {
                         window.location.reload();
                     } else {
-                        console.error("Error:", response.error);
+                        mostrarModalPermiso(response.error || "Ocurrió un error al intentar eliminar el registro");
                     }
                 } else {
-                    console.error("Error en la solicitud:", xhr.status);
+                    mostrarModalPermiso("Error de conexión con el servidor.");
                 }
             }
         };
-        
+
         xhr.send("editorialid=" + editorialid);
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const toggleBtn = document.getElementById("menu-toggle");
         const sidebar = document.getElementById("sidebar");
         const body = document.body;
 
         if (toggleBtn && sidebar) {
-            toggleBtn.addEventListener("click", function () {
+            toggleBtn.addEventListener("click", function() {
                 const isHidden = sidebar.classList.toggle("d-none");
 
                 if (isHidden) {

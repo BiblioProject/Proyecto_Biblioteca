@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,72 +13,62 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
 </head>
+
 <body>
-    {% block content %}
-    {% include 'partials/sidebar.html' %}
-    {% include 'partials/topbar.html' %}
-    <div class="main-content px-3">    
+    {% block content %} {% include 'partials/sidebar.html' %} {% include 'partials/topbar.html' %}
+    <div class="main-content px-3">
         <div class="page-header d-flex align-items-center justify-content-between">
             <h2><i class="bi bi-person-lines-fill"></i> Usuarios</h2>
             <form method="get" class="d-flex" role="search">
                 <input class="form-control me-2" type="search" placeholder="Buscar usuarios..." name="q" value="{{ request.GET.q }}">
-            </form>            
+            </form>
         </div>
         {% if page_obj %}
         <div class="table-responsive mt-3">
-            {# === Tabla para Mi Usuario === #}
-            {% with my_user_list=page_obj|dictsort:"id" %}
-                {% for user in my_user_list %}
-                    {% if user.id == request.user.id %}
-                        {% with user as my_user %}
-                            <h5><i class="bi bi-person-check"></i> Mi Usuario</h5>
-                            <table class="table table-bordered table-hover text-center align-middle bg-white mb-4">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Nombre de usuario</th>
-                                        <th>Nombre</th>
-                                        <th>Apellido</th>
-                                        <th>Correo electrónico</th>
-                                        <th>Fecha de registro</th>
-                                        <th>Última conexión</th>
-                                        <th>Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{{ my_user.id }}</td>
-                                        <td>{{ my_user.username }}</td>
-                                        <td>{{ my_user.first_name|default:"Sin especificar" }}</td>
-                                        <td>{{ my_user.last_name|default:"Sin especificar" }}</td>
-                                        <td>
-                                            {% if user.email %}
-                                            <div class="rounded-pill bg-primary text-white p-1">
-                                                {{ my_user.email }}
-                                            </div>
-                                            {% else %}
-                                            Sin especificar
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ my_user.date_joined }}</td>
-                                        <td>{{ my_user.last_login|default:"Sin especificar" }}</td>
-                                        <td>
-                                            <span class="act-btn delete-user text-danger" title="Borrar Usuario" style="cursor: pointer; font-size:25px;">
+            {# === Tabla para Mi Usuario === #} {% with my_user_list=page_obj|dictsort:"id" %} {% for user in my_user_list %} {% if user.id == request.user.id %} {% with user as my_user %}
+            <h5><i class="bi bi-person-check"></i> Mi Usuario</h5>
+            <table class="table table-bordered table-hover text-center align-middle bg-white mb-4">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre de usuario</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Correo electrónico</th>
+                        <th>Rol</th>
+                        <th>Fecha de registro</th>
+                        <th>Última conexión</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-userid="{{ user.id }}">
+                        <td>{{ my_user.id }}</td>
+                        <td>{{ my_user.username }}</td>
+                        <td>{{ my_user.first_name|default:"Sin especificar" }}</td>
+                        <td>{{ my_user.last_name|default:"Sin especificar" }}</td>
+                        <td>
+                            {% if user.email %}
+                            <div class="rounded-pill bg-primary text-white p-1">
+                                {{ my_user.email }}
+                            </div>
+                            {% else %} Sin especificar {% endif %}
+                        </td>
+                        <td>{% if user.groups.first %} {{ user.groups.first.name|capfirst }} {% else %} Sin rol {% endif %}</td>
+                        <td>{{ my_user.date_joined }}</td>
+                        <td>{{ my_user.last_login|default:"Sin especificar" }}</td>
+                        <td>
+                            <span class="act-btn delete-user text-danger" title="Borrar Usuario" style="cursor: pointer; font-size:25px;">
                                                 <i class="bi bi-trash3-fill fs-5"></i>
                                             </span>
-                                            <span class="act-btn edit-user text-secondary" title="Editar Usuario" style="cursor: pointer; font-size:25px;" onclick="abrir_modal_edicion('{% url 'edit_user' my_user.id %}')">
-                                                <i class="bi bi-pencil-square fs-5"></i>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        {% endwith %}
-                    {% endif %}
-                {% endfor %}
-            {% endwith %}
-        
-            {# === Tabla para Otros Usuarios === #}
+                            <span class="act-btn edit-user text-secondary" title="Editar Rol" style="cursor: pointer; font-size:25px;" onclick="abrir_modal_edicion('{% url 'edit_user' user.id %}')">
+                                    <i class="bi bi-pencil-square fs-5"></i>
+                                </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            {% endwith %} {% endif %} {% endfor %} {% endwith %} {# === Tabla para Otros Usuarios === #}
             <h5><i class="bi bi-people"></i> Otros Usuarios</h5>
             <table class="table table-bordered table-hover text-center align-middle bg-white">
                 <thead class="table-light">
@@ -87,61 +78,61 @@
                         <th>Nombre</th>
                         <th>Apellido</th>
                         <th>Correo electrónico</th>
+                        <th>Rol</th>
                         <th>Fecha de registro</th>
                         <th>Última conexión</th>
                         <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for user in page_obj %}
-                        {% if user.id != request.user.id %}
-                        <tr>
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.username }}</td>
-                            <td>{{ user.first_name|default:"Sin especificar" }}</td>
-                            <td>{{ user.last_name|default:"Sin especificar" }}</td>
-                            <td>
-                                {% if user.email %}
-                                <div class="rounded-pill bg-primary text-white p-1">
-                                    {{ user.email }}
-                                </div>
-                                {% else %}
-                                Sin especificar
-                                {% endif %}
-                            </td>
-                            <td>{{ user.date_joined }}</td>
-                            <td>
-                                {% if user.last_login %}
-                                {{ user.last_login }}
-                                {% else %}
-                                Sin especificar
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="act-btn delete-user text-danger" title="Borrar Usuario" style="cursor: pointer; font-size:25px;">
+                    {% for user in page_obj %} {% if user.id != request.user.id %}
+                    <tr data-userid="{{ user.id }}">
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.first_name|default:"Sin especificar" }}</td>
+                        <td>{{ user.last_name|default:"Sin especificar" }}</td>
+                        <td>
+                            {% if user.email %}
+                            <div class="rounded-pill bg-primary text-white p-1">
+                                {{ user.email }}
+                            </div>
+                            {% else %} Sin especificar {% endif %}
+                        </td>
+                        <td>
+                            {% if user.groups.first %} {{ user.groups.first.name|capfirst }} {% else %} Sin rol {% endif %}
+                        </td>
+                        <td>{{ user.date_joined }}</td>
+                        <td>
+                            {% if user.last_login %} {{ user.last_login }} {% else %} Sin especificar {% endif %}
+                        </td>
+                        <td>
+                            <span class="act-btn delete-user text-danger" title="Borrar Usuario" style="cursor: pointer; font-size:25px;">
                                     <i class="bi bi-trash3-fill fs-5"></i>
                                 </span>
-                                <span class="act-btn edit-user text-secondary" title="Editar Usuario" style="cursor: pointer; font-size:25px;" onclick="abrir_modal_edicion('{% url 'edit_user' user.id %}')">
+                            <span class="act-btn edit-user text-secondary" title="Editar Rol" style="cursor: pointer; font-size:25px;" onclick="abrir_modal_edicion('{% url 'edit_user' user.id %}')">
                                     <i class="bi bi-pencil-square fs-5"></i>
                                 </span>
-                            </td>
-                        </tr>
-                        {% endif %}
-                    {% endfor %}
+                        </td>
+                    </tr>
+                    {% endif %} {% endfor %}
                 </tbody>
             </table>
             {% include 'partials/pagination.html' %}
-        </div>        
+        </div>
         {% else %}
-            <div class="alert alert-warning mt-4 text-center" role="alert">
-                No se encontraron usuarios{% if search_term %} que coincidan con tu búsqueda "<strong>{{ search_term }}</strong>"{% endif %}.
-            </div>
+        <div class="alert alert-warning mt-4 text-center" role="alert">
+            No se encontraron usuarios{% if search_term %} que coincidan con tu búsqueda "<strong>{{ search_term }}</strong>"{% endif %}.
+        </div>
         {% endif %}
     </div>
     <div class="modal fade" id="creacion" role="dialog"></div>
     <div class="modal fade" id="edicion" role="dialog"></div>
-    {% endblock %}
+    {% endblock %} {% include 'partials/modal_permiso.html' %}
+
+    <div class="modal fade" id="edicion" tabindex="-1" role="dialog"></div>
+
 </body>
+
 </html>
 
 <script type="text/javascript">
@@ -154,18 +145,86 @@
         });
     }
 
+    // Enviar formulario de edición de usuario por AJAX y redirigir al guardar
+    $(document).on('submit', '#formEditUser', function(event) {
+        event.preventDefault();
+        const form = $(this);
+        const actionUrl = form.attr('action');
+
+        $.ajax({
+            type: 'POST',
+            url: actionUrl,
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    $('#edicion').modal('hide');
+                    window.location.href = "{% url 'users' %}";
+                } else {
+                    // Si hay errores, reemplazamos el contenido del modal con el formulario actualizado
+                    $('#edicion').html(response.form_html);
+                }
+            },
+            error: function() {
+                mostrarModalPermiso("Ocurrió un error al guardar los cambios.");
+            }
+        });
+    });
+
+
+    function mostrarModalPermiso(mensaje) {
+        const modalBody = document.getElementById("permisoModalBody");
+        const modalFooter = document.getElementById("permisoModalFooter");
+
+        modalBody.textContent = mensaje;
+
+        modalFooter.innerHTML = `
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+    `;
+
+        const modal = new bootstrap.Modal(document.getElementById("permisoModal"));
+        modal.show();
+    }
+
+    function mostrarConfirmacionEliminarPropiaCuenta(userid) {
+        const modalBody = document.getElementById("permisoModalBody");
+        const modalFooter = document.getElementById("permisoModalFooter");
+
+        modalBody.textContent = "¿Estás seguro de que deseas eliminar tu propia cuenta? Esta acción no se puede deshacer.";
+
+        modalFooter.innerHTML = `
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="btnConfirmarEliminarMiCuenta" class="btn btn-danger">Confirmar</button>
+    `;
+
+        const modal = new bootstrap.Modal(document.getElementById("permisoModal"));
+        modal.show();
+
+        document.getElementById("btnConfirmarEliminarMiCuenta").onclick = function() {
+            modal.hide();
+            delete_user(userid);
+        };
+    }
+
     document.querySelectorAll(".delete-user").forEach((btn) => {
         btn.onclick = function() {
-            delete_user(this.closest("tr").dataset.userid);
+            const userid = this.closest("tr").dataset.userid;
+            const loggedUserId = "{{ request.user.id }}";
+
+            if (parseInt(userid) === parseInt(loggedUserId)) {
+                mostrarConfirmacionEliminarPropiaCuenta(userid);
+            } else {
+                delete_user(userid);
+            }
         };
     });
+
 
     function delete_user(userid) {
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "{% url 'delete_user' %}", true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-        
+
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4) {
                 if (xhr.status == 200) {
@@ -173,24 +232,24 @@
                     if (response.success) {
                         window.location.reload();
                     } else {
-                        console.error("Error:", response.error);
+                        mostrarModalPermiso(response.error || "Ocurrió un error al intentar eliminar el usuario.");
                     }
                 } else {
-                    console.error("Error en la solicitud:", xhr.status);
+                    mostrarModalPermiso("Error en la solicitud: " + xhr.status);
                 }
             }
         };
-        
+
         xhr.send("userid=" + userid);
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const toggleBtn = document.getElementById("menu-toggle");
         const sidebar = document.getElementById("sidebar");
         const body = document.body;
 
         if (toggleBtn && sidebar) {
-            toggleBtn.addEventListener("click", function () {
+            toggleBtn.addEventListener("click", function() {
                 const isHidden = sidebar.classList.toggle("d-none");
 
                 if (isHidden) {
@@ -213,4 +272,5 @@
             }
         }
     });
+</script>
 </script>

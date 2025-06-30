@@ -1,14 +1,14 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.response import TemplateResponse
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import auth, messages
 from .models import Lending, Book, Reader, Editorial, Genre, Language
 from django.conf import settings
 import glob,os, json
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from .forms import BookForm, ReaderForm, LendingForm, LanguageForm, EditorialForm, GenreForm
+from .forms import BookForm, ReaderForm, LendingForm, LanguageForm, EditorialForm, GenreForm, UsuarioEditarForm
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.shortcuts import render, redirect
 from .forms import RegistroUsuarioForm
@@ -21,6 +21,13 @@ from django.db.models.functions import Cast
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import Group
+from django.urls import reverse
+
+
+
+def is_admin(user):
+   return user.groups.filter(name='admin').exists() or user.is_superuser
 
 class CustomLoginView(LoginView):
    template_name = "auth/login.html"
@@ -45,7 +52,9 @@ def registro_usuario(request):
    if request.method == 'POST':
       form = RegistroUsuarioForm(request.POST)
       if form.is_valid():
-         form.save()
+         user = form.save()
+         grupo_encargado = Group.objects.get(name='Encargado')
+         user.groups.add(grupo_encargado)
          return redirect('login')
    else:
       form = RegistroUsuarioForm()
@@ -131,6 +140,7 @@ def languages_view(request):
    return list_objects(request, Language, 'languages/languages.html')
 
 @login_required(login_url='/app_biblioteca/login/')
+@user_passes_test(is_admin, login_url='/app_biblioteca/main/')
 def users_view(request):
    return list_objects(request, User, 'users/users.html', per_page=5)
 
@@ -161,15 +171,29 @@ def books_language(request, languageid):
 
 @login_required(login_url='/app_biblioteca/login/')
 def delete_object(request, model, object_id_name):
-   if request.method == "POST":
-      object_id = request.POST.get(object_id_name, None)
-      if object_id:
-         obj = get_object_or_404(model, id=object_id)
-         obj.is_active = False
-         obj.save()
-         return JsonResponse({"success": True})
-      return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
-   return JsonResponse({"success": False, "error": "Método no permitido"})
+    if request.method == "POST":
+        # Verifica si el usuario tiene permisos de administrador
+        if not is_admin(request.user):
+            return JsonResponse({"success": False, "error": "Necesitas permisos de administrador"})
+
+        object_id = request.POST.get(object_id_name, None)
+        if object_id:
+            obj = get_object_or_404(model, id=object_id)
+
+            if model == User:
+                if not request.user.is_superuser:
+                    return JsonResponse({"success": False, "error": "No tienes permiso para eliminar usuarios"})
+                if obj.is_superuser:
+                    return JsonResponse({"success": False, "error": "No se puede eliminar otro Administrador"})
+
+            obj.is_active = False
+            obj.save()
+            return JsonResponse({"success": True})
+
+        return JsonResponse({"success": False, "error": "No se proporcionó un ID válido"})
+
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
 
 @login_required(login_url='/app_biblioteca/login/')
 def delete_lending(request):
@@ -282,113 +306,162 @@ def editLending(request, id):
       lending = None
    return render(request, 'lendings/modals/editLending.html', {'lending_form': lending_form, 'error':error, 'lending': lending})
 
+@login_required
 def createLanguage(request):
-   if request.method == 'POST':
-      language_form = LanguageForm(request.POST)
-      if language_form.is_valid():
-         language_form.save()
-         return redirect('languages')
-   else:
-      language_form = LanguageForm()
-   return render(request, 'languages/modals/createLanguage.html',{'language_form':language_form})
+    if not is_admin(request.user):
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Necesitas permisos de administrador'}, status=403)
+        return redirect('languages')
 
+    if request.method == 'POST':
+        language_form = LanguageForm(request.POST)
+        if language_form.is_valid():
+            language_form.save()
+            return redirect('languages')
+    else:
+        language_form = LanguageForm()
+    return render(request, 'languages/modals/createLanguage.html', {'language_form': language_form})
+
+@login_required
 def editLanguage(request, id):
-   language_form = None
-   error = None
-   try:
-      language = Language.objects.get(id = id)
-      if request.method == 'GET':
-         language_form = LanguageForm(instance = language)
-      else:
-         language_form = LanguageForm(request.POST, instance = language)
-         if language_form.is_valid():
-               language_form.save()
-         return redirect('languages')
-   except ObjectDoesNotExist as e: 
-      error = e
-      language = None
-   return render(request, 'languages/modals/editLanguage.html', {'language_form': language_form, 'error':error, 'language': language})
+    if not is_admin(request.user):
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Necesitas permisos de administrador'}, status=403)
+        return redirect('languages')
 
+    language_form = None
+    error = None
+    try:
+        language = Language.objects.get(id=id)
+        if request.method == 'GET':
+            language_form = LanguageForm(instance=language)
+        else:
+            language_form = LanguageForm(request.POST, instance=language)
+            if language_form.is_valid():
+                language_form.save()
+            return redirect('languages')
+    except ObjectDoesNotExist as e:
+        error = e
+        language = None
+    return render(request, 'languages/modals/editLanguage.html', {'language_form': language_form, 'error': error, 'language': language})
+
+@login_required
 def createEditorial(request):
-   if request.method == 'POST':
-      editorial_form = EditorialForm(request.POST)
-      if editorial_form.is_valid():
-         editorial_form.save()
-         return redirect('editorials')
-   else:
-      editorial_form = EditorialForm()
-   return render(request, 'editorials/modals/createEditorial.html',{'editorial_form':editorial_form})
+    if not is_admin(request.user):
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Necesitas permisos de administrador'}, status=403)
+        return redirect('editorials')
 
+    if request.method == 'POST':
+        editorial_form = EditorialForm(request.POST)
+        if editorial_form.is_valid():
+            editorial_form.save()
+            return redirect('editorials')
+    else:
+        editorial_form = EditorialForm()
+    return render(request, 'editorials/modals/createEditorial.html', {'editorial_form': editorial_form})
+
+@login_required
 def editEditorial(request, id):
-   editorial_form = None
-   error = None
-   try:
-      editorial = Editorial.objects.get(id = id)
-      if request.method == 'GET':
-         editorial_form = EditorialForm(instance = editorial)
-      else:
-         editorial_form = EditorialForm(request.POST, instance = editorial)
-         if editorial_form.is_valid():
-               editorial_form.save()
-         return redirect('editorials')
-   except ObjectDoesNotExist as e: 
-      error = e
-      editorial = None
-   return render(request, 'editorials/modals/editEditorial.html', {'editorial_form': editorial_form, 'error':error, 'editorial': editorial})
+    if not is_admin(request.user):
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Necesitas permisos de administrador'}, status=403)
+        return redirect('editorials')
 
+    editorial_form = None
+    error = None
+    try:
+        editorial = Editorial.objects.get(id=id)
+        if request.method == 'GET':
+            editorial_form = EditorialForm(instance=editorial)
+        else:
+            editorial_form = EditorialForm(request.POST, instance=editorial)
+            if editorial_form.is_valid():
+                editorial_form.save()
+            return redirect('editorials')
+    except ObjectDoesNotExist as e:
+        error = e
+        editorial = None
+    return render(request, 'editorials/modals/editEditorial.html', {'editorial_form': editorial_form, 'error': error, 'editorial': editorial})
+
+
+@login_required
 def createGenre(request):
-   if request.method == 'POST':
-      genre_form = GenreForm(request.POST)
-      if genre_form.is_valid():
-         genre_form.save()
-         return redirect('genres')
-   else:
-      genre_form = GenreForm()
-   return render(request, 'genres/modals/createGenre.html',{'genre_form':genre_form})
+    if not request.user.groups.filter(name='Admin').exists() and not request.user.is_superuser:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Necesitas permisos de administrador'}, status=403)
+        return redirect('genres')
 
+    if request.method == 'POST':
+        genre_form = GenreForm(request.POST)
+        if genre_form.is_valid():
+            genre_form.save()
+            return redirect('genres')
+    else:
+        genre_form = GenreForm()
+    return render(request, 'genres/modals/createGenre.html', {'genre_form': genre_form})
+
+
+@login_required
 def editGenre(request, id):
-   genre_form = None
-   error = None
-   try:
-      genre = Genre.objects.get(id = id)
-      if request.method == 'GET':
-         genre_form = GenreForm(instance = genre)
-      else:
-         genre_form = GenreForm(request.POST, instance = genre)
-         if genre_form.is_valid():
-               genre_form.save()
-         return redirect('genres')
-   except ObjectDoesNotExist as e: 
-      error = e
-      genre = None
-   return render(request, 'genres/modals/editGenre.html', {'genre_form': genre_form, 'error':error, 'genre': genre})
+    if not is_admin(request.user):
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Necesitas permisos de administrador'}, status=403)
+        return redirect('genres')
 
-def createUser(request):
-   if request.method == 'POST':
-      user_form = UserForm(request.POST)
-      if user_form.is_valid():
-         user_form.save()
-         return redirect('users')
-   else:
-      user_form = UserForm()
-   return render(request, 'users/modals/createUser.html',{'user_form':user_form})
+    genre_form = None
+    error = None
+    try:
+        genre = Genre.objects.get(id=id)
+        if request.method == 'GET':
+            genre_form = GenreForm(instance=genre)
+        else:
+            genre_form = GenreForm(request.POST, instance=genre)
+            if genre_form.is_valid():
+                genre_form.save()
+            return redirect('genres')
+    except ObjectDoesNotExist as e:
+        error = e
+        genre = None
+    return render(request, 'genres/modals/editGenre.html', {'genre_form': genre_form, 'error': error, 'genre': genre})
 
-def editUser(request, id):
-   user_form = None
-   error = None
-   try:
-      user = User.objects.get(id = id)
-      if request.method == 'GET':
-         user_form = UserForm(instance = user)
-      else:
-         user_form = UserForm(request.POST, instance = user)
-         if user_form.is_valid():
-               user_form.save()
-         return redirect('users')
-   except ObjectDoesNotExist as e: 
-      error = e
-      user = None
-   return render(request, 'users/modals/editUser.html', {'user_form': user_form, 'error':error, 'user': user})
+
+@login_required
+def edit_user(request, id):
+    usuario = get_object_or_404(User, id=id)
+    is_self = (request.user.id == usuario.id)
+
+    if request.method == 'POST':
+        form = UsuarioEditarForm(request.POST, instance=usuario, is_self=is_self)
+        if form.is_valid():
+            form.save()  # Guarda los campos normales
+
+            # Actualiza el grupo (rol)
+            nuevo_rol = form.cleaned_data.get('rol')
+            if nuevo_rol:
+                usuario.groups.clear()
+                usuario.groups.add(nuevo_rol)
+
+                # Cambia permisos dependiendo del rol
+                if nuevo_rol.name == 'Admin':
+                    usuario.is_staff = True
+                    usuario.is_superuser = True
+                elif nuevo_rol.name == 'Encargado':
+                    usuario.is_staff = False
+                    usuario.is_superuser = False
+
+            usuario.save()
+            return JsonResponse({'success': True, 'redirect_url': reverse('users')})
+        return JsonResponse({'success': False, 'errors': form.errors})
+
+    else:
+        form = UsuarioEditarForm(instance=usuario, is_self=is_self)
+        return render(request, 'users/modals/edit_user_modal.html', {
+            'form': form,
+            'usuario': usuario,
+            'is_self': is_self
+        })
+
 
 def custom_password_reset(request):
     if request.method == 'POST':
@@ -440,6 +513,7 @@ def custom_password_reset_confirm(request, token):
     return render(request, 'auth/custom_password_reset_confirm.html')
    
 @login_required(login_url='/app_biblioteca/login/')
+@user_passes_test(is_admin, login_url='/app_biblioteca/main/')
 def dashboard(request):
    stats = {
       'total_usuarios': User.objects.count(),

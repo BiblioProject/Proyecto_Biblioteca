@@ -54,7 +54,7 @@ urlpatterns = [
     path('createGenre/', views.createGenre, name='create_genre'),
     path('editGenre/<int:id>', views.editGenre, name = 'edit_genre'),
 
-    path('editUser/<int:id>', views.editUser, name = 'edit_user'),
+    path('edit_user/<int:id>', views.edit_user, name = 'edit_user'),
 
     # auth/password_reset
     path('auth/', views.custom_password_reset, name='custom_password_reset'),

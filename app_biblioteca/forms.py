@@ -3,13 +3,41 @@ from .models import Book, Reader, Lending, Language, Genre, Editorial
 from django.utils.timezone import now
 from datetime import timedelta
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 
 class RegistroUsuarioForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
+
+class UsuarioEditarForm(forms.ModelForm):
+    rol = forms.ModelChoiceField(
+        queryset=Group.objects.filter(name__in=["Admin", "Encargado"]),
+        required=False,
+        empty_label="Selecciona un rol"
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.is_self = kwargs.pop('is_self', False)
+        super(UsuarioEditarForm, self).__init__(*args, **kwargs)
+
+        if not self.is_self:
+            # Si no se está editando a sí mismo, deshabilitar todos los campos excepto el rol
+            for field in self.fields:
+                if field != 'rol':
+                    self.fields[field].disabled = True
+        else:
+            # Si se está editando a sí mismo, el campo de rol también debe ser editable
+            self.fields['rol'].required = False
+
+        # Establece el valor inicial del rol actual
+        if self.instance and self.instance.groups.exists():
+            self.fields['rol'].initial = self.instance.groups.first()
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'rol']
 
 class BookForm(forms.ModelForm):
     class Meta:
@@ -201,3 +229,4 @@ class GenreForm(forms.ModelForm):
                 }
             ),
         }
+

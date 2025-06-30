@@ -3,11 +3,13 @@
         <h3 class="mb-0"><i class="bi bi-journal-bookmark"></i> Biblioteca</h3>
     </div>
     <ul class="nav flex-column px-2 mt-3">
+        {% if user.groups.first.name == "admin" or user.is_superuser %}
         <li class="nav-item">
-        <a href="{% url 'dashboard' %}" class="nav-link{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}">
-            <i class="bi bi-speedometer2"></i> Dashboard
-        </a>
+            <a href="{% url 'dashboard' %}" class="nav-link{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
         </li>
+        {% endif%}
         <li class="nav-item">
             <a href="{% url 'books' %}" class="nav-link{% if request.resolver_match.url_name == 'books' %} active{% endif %}">
                 <i class="bi bi-book"></i> Libros
@@ -38,11 +40,13 @@
                 <i class="bi bi-translate"></i> Idiomas
             </a>
         </li>
+        {% if user.groups.first.name == "admin" or user.is_superuser %}
         <li class="nav-item">
             <a href="{% url 'users' %}" class="nav-link{% if request.resolver_match.url_name == 'users' %} active{% endif %}">
                 <i class="bi bi-person-lines-fill"></i> Usuarios
             </a>
         </li>
+        {% endif %}
     </ul>
     <div class="sidebar-footer px-3 py-3 mt-5">
         <div class="user-info mb-2 mt-1">
