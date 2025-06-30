@@ -114,14 +114,23 @@
     function abrir_modal_edicion(url) {
         $('#edicion').load(url, function() {
             $('#edicion').modal('show');
+            // Adjuntar manualmente el evento de clic para cerrar el modal
+            $('#edicion').find('[data-dismiss="modal"]').off('click').on('click', function() {
+                $('#edicion').modal('hide');
+            });
         });
     }
 
     function abrir_modal_creacion(url) {
         $('#creacion').load(url, function() {
             $('#creacion').modal('show');
+            // Adjuntar manualmente el evento de clic para cerrar el modal
+            $('#creacion').find('[data-dismiss="modal"]').off('click').on('click', function() {
+                $('#creacion').modal('hide');
+            });
         });
     }
+
 
     function mostrarModalPermiso(mensaje) {
         const modalBody = document.getElementById("permisoModalBody");
