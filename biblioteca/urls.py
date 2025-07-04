@@ -1,29 +1,13 @@
-"""
-URL configuration for biblioteca project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
-from app_biblioteca import views
+from app_biblioteca.views_list import main
+from app_biblioteca.views_auth import logout_view
 from django.conf.urls.static import static
 from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path(r'app_biblioteca/', include('app_biblioteca.urls')),
-    # path('accounts/',include('django.contrib.auth.urls')),
-    path(r'',views.main,name='main'),
-    path('logout/', views.logout, name='logout'),
-]
+    path('app_biblioteca/', include('app_biblioteca.urls')),
+    path('', main, name='main'),
+    path('logout/', logout_view, name='logout'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,67 +1,79 @@
-from app_biblioteca import views
-from django.urls import path, include
-from . import views
-from django.contrib.auth import views as auth_views
-from .views import dashboard, CustomLoginView, CustomPasswordResetView, CustomPasswordResetDoneView, CustomPasswordResetConfirmView, CustomPasswordResetCompleteView
+from django.urls import path
+from app_biblioteca.views_auth import (
+    CustomLoginView, custom_password_reset, custom_password_reset_confirm,
+    registro_usuario, valida_user
+)
+from app_biblioteca.views_list import (
+    main, books_view, readers_view, editorials_view, genres_view, languages_view,
+    users_view, lendings_book, lendings_reader,
+    books_editorial, books_genre, books_language
+)
+from app_biblioteca.views_crud import (
+    createBook, editBook, delete_book,
+    createReader, editReader, delete_reader,
+    createLending, editLending, delete_lending,
+    createLanguage, editLanguage, delete_language,
+    createEditorial, editEditorial, delete_editorial,
+    createGenre, editGenre, delete_genre,
+    edit_user, delete_user,
+)
+from app_biblioteca.views_dashboard import dashboard
 
 urlpatterns = [
-    path(r'', views.main, name='main'), # lendings
-    path(r'lendings_book/<int:bookid>/',views.lendings_book,name='lendings_book'), # préstamos desde libro
-    path(r'lendings_reader/<int:readerid>/',views.lendings_reader,name='lendings_reader'), # préstamos desde lector
-    path('delete_lending/', views.delete_lending, name='delete_lending'),
+    path('', main, name='main'),  # préstamos
 
-    path('login/', views.login, name='login'),
-    path('registro/', views.registro_usuario, name='registro'),
-    path('valida_user/', views.valida_user, name='valida_user'),
+    # Libros
+    path('books/', books_view, name='books'),
+    path('delete_book/', delete_book, name='delete_book'),
+    path('createBook/', createBook, name='create_book'),
+    path('editBook/<int:id>/', editBook, name='edit_book'),
+    path('books_editorial/<int:editorialid>/', books_editorial, name='books_editorial'),
+    path('books_genre/<int:genreid>/', books_genre, name='books_genre'),
+    path('books_language/<int:languageid>/', books_language, name='books_language'),
 
-    path('books/', views.books_view, name='books'),
-    path('delete_book/', views.delete_book, name='delete_book'),
+    # Lectores
+    path('readers/', readers_view, name='readers'),
+    path('delete_reader/', delete_reader, name='delete_reader'),
+    path('createReader/', createReader, name='create_reader'),
+    path('editReader/<int:id>/', editReader, name='edit_reader'),
 
-    path('readers/', views.readers_view, name='readers'),
-    path('delete_reader/', views.delete_reader, name='delete_reader'),
+    # Préstamos
+    path('delete_lending/', delete_lending, name='delete_lending'),
+    path('createLending/', createLending, name='create_lending'),
+    path('editLending/<int:id>/', editLending, name='edit_lending'),
+    path('lendings_book/<int:bookid>/', lendings_book, name='lendings_book'),
+    path('lendings_reader/<int:readerid>/', lendings_reader, name='lendings_reader'),
 
-    path('editorials/', views.editorials_view, name='editorials'),
-    path(r'books_editorial/<int:editorialid>/',views.books_editorial,name='books_editorial'), # libros desde editorial
-    path('delete_editorial/', views.delete_editorial, name='delete_editorial'),
+    # Editoriales
+    path('editorials/', editorials_view, name='editorials'),
+    path('delete_editorial/', delete_editorial, name='delete_editorial'),
+    path('createEditorial/', createEditorial, name='create_editorial'),
+    path('editEditorial/<int:id>/', editEditorial, name='edit_editorial'),
 
-    path('genres/', views.genres_view, name='genres'),
-    path(r'books_genre/<int:genreid>/',views.books_genre,name='books_genre'), # libros desde género
-    path('delete_genre/', views.delete_genre, name='delete_genre'),
+    # Géneros
+    path('genres/', genres_view, name='genres'),
+    path('delete_genre/', delete_genre, name='delete_genre'),
+    path('createGenre/', createGenre, name='create_genre'),
+    path('editGenre/<int:id>/', editGenre, name='edit_genre'),
 
-    path('languages/', views.languages_view, name='languages'),
-    path(r'books_language/<int:languageid>/',views.books_language,name='books_language'), # libros desde idiomas
-    path('delete_language/', views.delete_language, name='delete_language'),
+    # Idiomas
+    path('languages/', languages_view, name='languages'),
+    path('delete_language/', delete_language, name='delete_language'),
+    path('createLanguage/', createLanguage, name='create_language'),
+    path('editLanguage/<int:id>/', editLanguage, name='edit_language'),
 
-    path('users/', views.users_view, name='users'),
-    path('delete_user/', views.delete_user, name='delete_user'),
+    # Usuarios
+    path('users/', users_view, name='users'),
+    path('delete_user/', delete_user, name='delete_user'),
+    path('edit_user/<int:id>/', edit_user, name='edit_user'),
 
-    # crear y editar libros, lectores, préstamos, etc.
-    path('createBook/', views.createBook, name = 'create_book'),
-    path('editBook/<int:id>', views.editBook, name = 'edit_book'),
+    # Autenticación
+    path('login/', CustomLoginView.as_view(), name='login'),
+    path('registro/', registro_usuario, name='registro'),
+    path('valida_user/', valida_user, name='valida_user'),
+    path('auth/', custom_password_reset, name='custom_password_reset'),
+    path('reset_password/<str:token>/', custom_password_reset_confirm, name='custom_password_reset_confirm'),
 
-    path('createReader/', views.createReader, name = 'create_reader'),
-    path('editReader/<int:id>', views.editReader, name = 'edit_reader'),
-
-    path('createLending/', views.createLending, name = 'create_lending'),
-    path('editLending/<int:id>', views.editLending, name = 'edit_lending'),
-
-    path('createLanguage/', views.createLanguage, name='create_language'),
-    path('editLanguage/<int:id>', views.editLanguage, name = 'edit_language'),
-
-    path('createEditorial/', views.createEditorial, name='create_editorial'),
-    path('editEditorial/<int:id>', views.editEditorial, name = 'edit_editorial'),
-
-    path('createGenre/', views.createGenre, name='create_genre'),
-    path('editGenre/<int:id>', views.editGenre, name = 'edit_genre'),
-
-    path('edit_user/<int:id>', views.edit_user, name = 'edit_user'),
-
-    # auth/password_reset
-    path('auth/', views.custom_password_reset, name='custom_password_reset'),
-    path('auth/', views.custom_password_reset, name='custom_password_reset'),
-    path('reset_password/<str:token>/', views.custom_password_reset_confirm, name='custom_password_reset_confirm'),
-
-    path("login/", CustomLoginView.as_view(), name="login"), 
-
+    # Dashboard
     path('dashboard/', dashboard, name='dashboard'),
 ]
