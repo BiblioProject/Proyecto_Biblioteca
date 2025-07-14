@@ -3,20 +3,26 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
-from .models import Book, Reader, Lending, Language, Editorial, Genre
-from .forms import BookForm, ReaderForm, LendingForm, LanguageForm, EditorialForm, GenreForm, UsuarioEditarForm
+from app_biblioteca.models import Book, Reader, Lending, Language, Editorial, Genre
+from app_biblioteca.forms import BookForm, ReaderForm, LendingForm, LanguageForm, EditorialForm, GenreForm, UsuarioEditarForm
 from django.contrib.auth.models import User
-from app_biblioteca.views_utils import is_admin
-
-from .models import Book, Reader, Lending, Language, Editorial, Genre
+from app_biblioteca.views.views_utils import is_admin
+from app_biblioteca.models import Book, Reader, Lending, Language, Editorial, Genre
 from django.contrib.auth.models import User
 
 def handle_form(request, form_class, template_name, instance=None, redirect_url=None, context_name='form'):
     form = form_class(request.POST or None, instance=instance)
-    if request.method == 'POST' and form.is_valid():
-        form.save()
-        return redirect(redirect_url)
     
+    if request.method == 'POST' and form.is_valid():
+        obj = form.save(commit=False)
+
+        # Si es un préstamo, asignar el usuario actual si no tiene uno
+        if isinstance(obj, Lending) and not obj.user:
+            obj.user = request.user
+
+        obj.save()
+        return redirect(redirect_url)
+
     context = {
         context_name: form,
         'object': instance,

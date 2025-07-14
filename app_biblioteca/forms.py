@@ -5,7 +5,6 @@ from datetime import timedelta
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User, Group
 
-
 class RegistroUsuarioForm(UserCreationForm):
     class Meta:
         model = User

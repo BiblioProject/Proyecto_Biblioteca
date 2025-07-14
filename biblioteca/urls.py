@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
-from app_biblioteca.views_list import main
-from app_biblioteca.views_auth import logout_view
+from app_biblioteca.views.views_list import main
+from app_biblioteca.views.views_auth import logout_view
 from django.conf.urls.static import static
 from django.conf import settings
 

@@ -1,14 +1,14 @@
 from django.urls import path
-from app_biblioteca.views_auth import (
+from app_biblioteca.views.views_auth import (
     CustomLoginView, custom_password_reset, custom_password_reset_confirm,
     registro_usuario, valida_user
 )
-from app_biblioteca.views_list import (
+from app_biblioteca.views.views_list import (
     main, books_view, readers_view, editorials_view, genres_view, languages_view,
     users_view, lendings_book, lendings_reader,
     books_editorial, books_genre, books_language
 )
-from app_biblioteca.views_crud import (
+from app_biblioteca.views.views_crud import (
     createBook, editBook, delete_book,
     createReader, editReader, delete_reader,
     createLending, editLending, delete_lending,
@@ -17,7 +17,7 @@ from app_biblioteca.views_crud import (
     createGenre, editGenre, delete_genre,
     edit_user, delete_user,
 )
-from app_biblioteca.views_dashboard import dashboard
+from app_biblioteca.views.views_dashboard import dashboard
 
 urlpatterns = [
     path('', main, name='main'),  # préstamos

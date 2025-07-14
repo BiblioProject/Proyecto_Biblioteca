@@ -25,7 +25,8 @@
         </div>
         {% if page_obj %}
         <div class="table-responsive mt-3">
-            {# === Tabla para Mi Usuario === #} {% with my_user_list=page_obj|dictsort:"id" %} {% for user in my_user_list %} {% if user.id == request.user.id %} {% with user as my_user %}
+            {# === Tabla para Mi Usuario === #} 
+            {% with my_user_list=page_obj|dictsort:"id" %} {% for user in my_user_list %} {% if user.id == request.user.id %} {% with user as my_user %}
             <h5><i class="bi bi-person-check"></i> Mi Usuario</h5>
             <table class="table table-bordered table-hover text-center align-middle bg-white mb-4">
                 <thead class="table-light">
@@ -57,7 +58,7 @@
                         <td>{% if user.groups.first %} {{ user.groups.first.name|capfirst }} {% else %} Sin rol {% endif %}</td>
                         <td>{{ my_user.date_joined }}</td>
                         <td>{{ my_user.last_login|default:"Sin especificar" }}</td>
-                        <td>
+                        <td style="min-width: 80px;">
                             <span class="act-btn delete-user text-danger" title="Borrar Usuario" style="cursor: pointer; font-size:25px;">
                                                 <i class="bi bi-trash3-fill fs-5"></i>
                                             </span>
@@ -68,7 +69,8 @@
                     </tr>
                 </tbody>
             </table>
-            {% endwith %} {% endif %} {% endfor %} {% endwith %} {# === Tabla para Otros Usuarios === #}
+            {% endwith %} {% endif %} {% endfor %} {% endwith %} 
+            {# === Tabla para Otros Usuarios === #}
             <h5><i class="bi bi-people"></i> Otros Usuarios</h5>
             <table class="table table-bordered table-hover text-center align-middle bg-white">
                 <thead class="table-light">
@@ -105,7 +107,7 @@
                         <td>
                             {% if user.last_login %} {{ user.last_login }} {% else %} Sin especificar {% endif %}
                         </td>
-                        <td>
+                        <td style="min-width: 80px;">
                             <span class="act-btn delete-user text-danger" title="Borrar Usuario" style="cursor: pointer; font-size:25px;">
                                     <i class="bi bi-trash3-fill fs-5"></i>
                                 </span>

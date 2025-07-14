@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
-from .models import Book, Reader, Lending, Editorial, Genre, Language
+from app_biblioteca.models import Book, Reader, Lending, Editorial, Genre, Language
 from .views_utils import list_objects, is_admin
 
 # Vista principal - préstamos
