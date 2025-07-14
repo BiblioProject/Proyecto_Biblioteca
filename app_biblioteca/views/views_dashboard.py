@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Count, Q
-from .models import Book, Lending, Reader, Editorial, Genre, Language
+from app_biblioteca.models import Book, Lending, Reader, Editorial, Genre, Language
 from django.contrib.auth.models import User
 from .views_utils import is_admin
 
