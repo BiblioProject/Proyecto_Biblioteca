@@ -81,6 +81,11 @@
             success: function(response) {
                 $('#edicion').html(response);
                 $('#edicion').modal('show');
+
+                // Adjuntar manualmente el evento de clic para cerrar el modal (soporte para Bootstrap 4 y 5)
+                $('#edicion').find('[data-dismiss="modal"], [data-bs-dismiss="modal"]').off('click').on('click', function () {
+                    $('#edicion').modal('hide');
+                });
             },
             error: function(xhr) {
                 if (xhr.status === 403) {
@@ -104,6 +109,11 @@
             success: function(response) {
                 $('#creacion').html(response);
                 $('#creacion').modal('show');
+
+                // Adjuntar manualmente el evento para cerrar el modal al hacer clic en "Cancelar" o "X"
+                $('#creacion').find('[data-dismiss="modal"], [data-bs-dismiss="modal"]').off('click').on('click', function () {
+                    $('#creacion').modal('hide');
+                });
             },
             error: function(xhr) {
                 if (xhr.status === 403) {
