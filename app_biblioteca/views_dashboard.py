@@ -27,9 +27,13 @@ def dashboard(request):
         num_prestamos=Count('lending', filter=Q(lending__is_active=True))
     ).order_by('-num_prestamos')[:5]
 
-    max_prestamos = libros_mas_prestados[0].num_prestamos if libros_mas_prestados else 1
+    max_prestamos = libros_mas_prestados[0].num_prestamos if libros_mas_prestados else 0
+
     for libro in libros_mas_prestados:
-        libro.porcentaje = round((libro.num_prestamos / max_prestamos) * 100, 2)
+        if max_prestamos == 0:
+            libro.porcentaje = 0
+        else:
+            libro.porcentaje = round((libro.num_prestamos / max_prestamos) * 100, 2)
 
     return render(request, 'dashboard/dashboard.html', {
         'stats': stats,
