@@ -6,7 +6,6 @@ from datetime import timedelta
 
 class Genre(models.Model):
     name = models.CharField(max_length=100, blank=False)
-
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -14,7 +13,6 @@ class Genre(models.Model):
 
 class Editorial(models.Model):
     name = models.CharField(max_length=100, blank=False)
-
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -22,7 +20,6 @@ class Editorial(models.Model):
 
 class Language(models.Model):
     name = models.CharField(max_length=50, blank=False)
-
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -32,33 +29,26 @@ class Book(models.Model):
     title = models.CharField(max_length=255, blank=False)
     author = models.CharField(max_length=255, blank=False)
     publication_year = models.IntegerField(blank=False)
-
     pages = models.IntegerField(null=True, blank=True)
     description = models.TextField(blank=True)
     stock = models.IntegerField(default=1)
     available = models.IntegerField(default=1)
-
     is_active = models.BooleanField(default=True)
-
     editorial = models.ForeignKey(Editorial, on_delete=models.CASCADE)
     language = models.ForeignKey(Language, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
     def clean(self):
-        # Validaciones de publicación
         if self.publication_year < 0:
             raise ValidationError("El año de publicación no puede ser negativo.")
         
         current_year = now().year
-
         if self.publication_year < 1000 or self.publication_year > current_year:
             raise ValidationError(f"El año de publicación debe estar entre 1000 y {current_year}.")
 
-        # Validación de páginas
         if self.pages is not None and self.pages < 0:
             raise ValidationError("La cantidad de páginas no puede ser negativa.")
         
-        # Validaciones de stock y disponibilidad
         if self.available > self.stock:
             raise ValidationError("La cantidad disponible no puede ser mayor que el stock.")
         if self.available < 0:
@@ -77,13 +67,10 @@ class Reader(models.Model):
     name = models.CharField(max_length=30, blank=False)
     first_surname = models.CharField(max_length=30, blank=False)
     second_surname = models.CharField(max_length=30, blank=True, null=True)
-    
     address = models.CharField(max_length=250, blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
-    
     sanctions = models.IntegerField(default=0)
     sanction_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    
     is_active = models.BooleanField(default=True)
 
     def clean(self):
@@ -105,10 +92,10 @@ class Lending(models.Model):
 
     reader = models.ForeignKey(Reader, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    user=models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 
     loan_term_days = models.IntegerField(default=7)
-    daily_rate=models.DecimalField(max_digits=10, decimal_places=2, default=1.50)
+    daily_rate = models.DecimalField(max_digits=10, decimal_places=2, default=1.50)
 
     date = models.DateField(default=now)
     estimated_return_date = models.DateField(null=False)
@@ -144,7 +131,8 @@ class Lending(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
 
-        if not self.pk:  # Préstamo nuevo
+        if not self.pk:
+            # NUEVO PRÉSTAMO
             if self.book.available <= 0:
                 raise ValidationError("No hay ejemplares disponibles.")
             self.book.available -= 1
@@ -152,22 +140,29 @@ class Lending(models.Model):
         else:
             old = Lending.objects.get(pk=self.pk)
 
-            # 🔁 Si pasa de Devuelto o Atrasado a Prestado
-            if old.state in [1, 2] and self.state == 0:
+            # CAMBIO DE LIBRO
+            if old.book != self.book:
+                old.book.available += 1
+                old.book.save()
+
+                if self.book.available <= 0:
+                    raise ValidationError("No hay ejemplares disponibles del nuevo libro.")
+                self.book.available -= 1
+                self.book.save()
+
+            # CAMBIO DE ESTADO: Devuelto o Atrasado → Prestado
+            elif old.state in [1, 2] and self.state == 0:
                 if self.book.available <= 0:
                     raise ValidationError("No hay ejemplares disponibles.")
                 self.book.available -= 1
-                self.real_return_date = None  # opcional: borrar fecha de devolución
-
-                # Solo si el estado anterior era Atrasado (2), revertir sanciones
+                self.real_return_date = None
                 if old.state == 2:
                     self.reader.sanctions = max(0, self.reader.sanctions - 1)
                     self.reader.sanction_amount = max(0, self.reader.sanction_amount - old.calculated_sanction_amount)
                     self.reader.save()
-
                 self.book.save()
 
-            # ✅ Si se devuelve el libro por primera vez (de Prestado a Devuelto/Atrasado)
+            # DEVOLUCIÓN
             elif old.state == 0 and self.real_return_date:
                 if self.real_return_date > self.estimated_return_date:
                     self.state = 2  # Atrasado
