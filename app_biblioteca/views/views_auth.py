@@ -11,6 +11,9 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.hashers import make_password
 from app_biblioteca.forms import RegistroUsuarioForm
 from django.urls import reverse
+from django.contrib.auth.hashers import check_password
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 
 class CustomLoginView(LoginView):
     template_name = "auth/login.html"
@@ -94,3 +97,28 @@ def custom_password_reset_confirm(request, token):
             messages.success(request, 'Contraseña cambiada. Inicia sesión.')
             return redirect('login')
     return render(request, 'auth/custom_password_reset_confirm.html')
+
+@login_required
+def cambiar_contrasena(request):
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        user = request.user
+
+        if not check_password(current_password, user.password):
+            return JsonResponse({'success': False, 'error': 'La contraseña actual no es correcta.'})
+
+        if new_password != confirm_password:
+            return JsonResponse({'success': False, 'error': 'Las nuevas contraseñas no coinciden.'})
+
+        if len(new_password) < 6:
+            return JsonResponse({'success': False, 'error': 'La nueva contraseña debe tener al menos 8 caracteres.'})
+
+        user.set_password(new_password)
+        user.save()
+
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False, 'error': 'Método no permitido.'})

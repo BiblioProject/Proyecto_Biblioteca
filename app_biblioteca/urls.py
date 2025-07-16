@@ -1,7 +1,7 @@
 from django.urls import path
 from app_biblioteca.views.views_auth import (
     CustomLoginView, custom_password_reset, custom_password_reset_confirm,
-    registro_usuario, valida_user
+    registro_usuario, valida_user, cambiar_contrasena
 )
 from app_biblioteca.views.views_list import (
     main, books_view, readers_view, editorials_view, genres_view, languages_view,
@@ -74,6 +74,7 @@ urlpatterns = [
     path('valida_user/', valida_user, name='valida_user'),
     path('auth/', custom_password_reset, name='custom_password_reset'),
     path('reset_password/<str:token>/', custom_password_reset_confirm, name='custom_password_reset_confirm'),
+    path('change_password/', cambiar_contrasena, name='change_password'),
 
     # Dashboard
     path('dashboard/', dashboard, name='dashboard'),
