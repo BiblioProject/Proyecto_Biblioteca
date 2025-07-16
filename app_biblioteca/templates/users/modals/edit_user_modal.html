@@ -19,9 +19,11 @@
                 <div class="form-group">
                     <label for="email" class="form-label">Correo electrónico</label> {{ form.email }}
                 </div>
+                {% if request.user.groups.first.name == "Admin" %}
                 <div class="form-group">
                     {{ form.rol.label_tag }} {{ form.rol }}
                 </div>
+                {% endif %}
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-primary">Guardar Cambios</button>

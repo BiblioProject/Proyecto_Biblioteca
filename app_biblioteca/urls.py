@@ -5,7 +5,7 @@ from app_biblioteca.views.views_auth import (
 )
 from app_biblioteca.views.views_list import (
     main, books_view, readers_view, editorials_view, genres_view, languages_view,
-    users_view, lendings_book, lendings_reader,
+    users_view, user_view, lendings_book, lendings_reader,
     books_editorial, books_genre, books_language
 )
 from app_biblioteca.views.views_crud import (
@@ -64,8 +64,9 @@ urlpatterns = [
 
     # Usuarios
     path('users/', users_view, name='users'),
+    path('user/', user_view, name='user'),
     path('delete_user/', delete_user, name='delete_user'),
-    path('edit_user/<int:id>/', edit_user, name='edit_user'),
+    path('edit_user/<int:id>/', edit_user, name='edit_user'),   
 
     # Autenticación
     path('login/', CustomLoginView.as_view(), name='login'),

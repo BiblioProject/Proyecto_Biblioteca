@@ -1,10 +1,10 @@
 <nav class="top-navbar d-flex align-items-center justify-content-between bg-white shadow-sm border-bottom" style="height:56px; position:fixed; left:0; right:0; top:0; z-index:1030; padding: 0 1.5rem;">
-    
+
     <!-- IZQUIERDA: Botón hamburguesa -->
     <div>
         <button class="btn btn-link" id="menu-toggle" style="color:#222;">
             <i class="bi bi-x fs-4" id="menu-icon"></i>
-        </button>                
+        </button>
     </div>
 
     <!-- DERECHA: Usuario -->
@@ -15,11 +15,13 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                 <li>
-                    <a class="dropdown-item no-underline" href="#">
+                    <a class="dropdown-item no-underline" href="{% url 'user' %}">
                         <i class="bi bi-person me-2"></i> Perfil
                     </a>
                 </li>
-                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
                 <li>
                     <form action="{% url 'logout' %}" method="post" class="m-0">
                         {% csrf_token %}

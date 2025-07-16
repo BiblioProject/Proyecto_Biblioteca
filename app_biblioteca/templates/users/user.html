@@ -1,0 +1,231 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+</head>
+
+<body>
+    {% block content %} {% include 'partials/sidebar.html' %} {% include 'partials/topbar.html' %}
+    <div class="main-content px-3">
+        <div class="page-header d-flex align-items-center justify-content-between">
+            <h2><i class="bi bi-person-lines-fill"></i> Usuario</h2>
+            <span class="act-btn edit-user text-secondary" title="Editar Rol" style="cursor: pointer; font-size:25px;" onclick="abrir_modal_edicion('{% url 'edit_user' user.id %}')">
+                                    <i class="bi bi-pencil-square fs-5"></i>
+                                </span>
+        </div>
+        {% if page_obj %}
+        <div class="table-responsive mt-3">
+            {% with my_user_list=page_obj|dictsort:"id" %} {% for user in my_user_list %} {% if user.id == request.user.id %} {% with user as my_user %}
+            <h5><i class="bi bi-person-check"></i> {{ my_user.first_name }} {{ my_user.last_name }}</h5>
+            <table class="table table-bordered bg-white w-100">
+                <tbody>
+                    <tr>
+                        <th class="bg-light">ID</th>
+                        <td>{{ my_user.id }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Nombre de usuario</th>
+                        <td>{{ my_user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Nombre</th>
+                        <td>{{ my_user.first_name|default:"Sin especificar" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Apellido</th>
+                        <td>{{ my_user.last_name|default:"Sin especificar" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Correo electrónico</th>
+                        <td>
+                            {% if my_user.email %}
+                            <div class="rounded-pill bg-primary text-white p-1 px-3 d-inline-block">
+                                {{ my_user.email }}
+                            </div>
+                            {% else %} Sin especificar {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Rol</th>
+                        <td>
+                            {% if my_user.groups.first %} {{ my_user.groups.first.name|capfirst }} {% else %} Sin rol {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Fecha de registro</th>
+                        <td>{{ my_user.date_joined }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Última conexión</th>
+                        <td>{{ my_user.last_login|default:"Sin especificar" }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            {% endwith %} {% endif %} {% endfor %} {% endwith %}
+        </div>
+        {% else %}
+        <div class="alert alert-warning mt-4 text-center" role="alert">
+            No se encontraron usuarios{% if search_term %} que coincidan con tu búsqueda "<strong>{{ search_term }}</strong>"{% endif %}.
+        </div>
+        {% endif %}
+
+    </div>
+    <div class="modal fade" id="creacion" role="dialog"></div>
+    <div class="modal fade" id="edicion" role="dialog"></div>
+    {% endblock %}
+
+    <div class="modal fade" id="edicion" tabindex="-1" role="dialog"></div>
+
+</body>
+
+</html>
+
+<script type="text/javascript">
+    // Códigos JS para que muestre el modal de edición y creación de idiomas
+    var $ = jQuery.noConflict();
+
+    function abrir_modal_edicion(url) {
+        $('#edicion').load(url, function() {
+            $('#edicion').modal('show');
+        });
+    }
+
+    // Enviar formulario de edición de usuario por AJAX y redirigir al guardar
+    $(document).on('submit', '#formEditUser', function(event) {
+        event.preventDefault();
+        const form = $(this);
+        const actionUrl = form.attr('action');
+
+        $.ajax({
+            type: 'POST',
+            url: actionUrl,
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    $('#edicion').modal('hide');
+                    window.location.href = "{% url 'user' %}";
+                } else {
+                    // Si hay errores, reemplazamos el contenido del modal con el formulario actualizado
+                    $('#edicion').html(response.form_html);
+                }
+            },
+            error: function() {
+                mostrarModalPermiso("Ocurrió un error al guardar los cambios.");
+            }
+        });
+    });
+
+
+    function mostrarModalPermiso(mensaje) {
+        const modalBody = document.getElementById("permisoModalBody");
+        const modalFooter = document.getElementById("permisoModalFooter");
+
+        modalBody.textContent = mensaje;
+
+        modalFooter.innerHTML = `
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+    `;
+
+        const modal = new bootstrap.Modal(document.getElementById("permisoModal"));
+        modal.show();
+    }
+
+    function mostrarConfirmacionEliminarPropiaCuenta(userid) {
+        const modalBody = document.getElementById("permisoModalBody");
+        const modalFooter = document.getElementById("permisoModalFooter");
+
+        modalBody.textContent = "¿Estás seguro de que deseas eliminar tu propia cuenta? Esta acción no se puede deshacer.";
+
+        modalFooter.innerHTML = `
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="btnConfirmarEliminarMiCuenta" class="btn btn-danger">Confirmar</button>
+    `;
+
+        const modal = new bootstrap.Modal(document.getElementById("permisoModal"));
+        modal.show();
+
+        document.getElementById("btnConfirmarEliminarMiCuenta").onclick = function() {
+            modal.hide();
+            delete_user(userid);
+        };
+    }
+
+    document.querySelectorAll(".delete-user").forEach((btn) => {
+        btn.onclick = function() {
+            const userid = this.closest("tr").dataset.userid;
+            const loggedUserId = "{{ request.user.id }}";
+
+            if (parseInt(userid) === parseInt(loggedUserId)) {
+                mostrarConfirmacionEliminarPropiaCuenta(userid);
+            } else {
+                delete_user(userid);
+            }
+        };
+    });
+
+
+    function delete_user(userid) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "{% url 'delete_user' %}", true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        window.location.reload();
+                    } else {
+                        mostrarModalPermiso(response.error || "Ocurrió un error al intentar eliminar el usuario.");
+                    }
+                } else {
+                    mostrarModalPermiso("Error en la solicitud: " + xhr.status);
+                }
+            }
+        };
+
+        xhr.send("userid=" + userid);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const toggleBtn = document.getElementById("menu-toggle");
+        const sidebar = document.getElementById("sidebar");
+        const body = document.body;
+
+        if (toggleBtn && sidebar) {
+            toggleBtn.addEventListener("click", function() {
+                const isHidden = sidebar.classList.toggle("d-none");
+
+                if (isHidden) {
+                    body.style.paddingLeft = "1rem";
+                } else {
+                    body.style.paddingLeft = "230px";
+                }
+
+                // Cambiar ícono del botón hamburguesa
+                const icon = toggleBtn.querySelector("i");
+                if (icon) {
+                    icon.classList.toggle("bi-list");
+                    icon.classList.toggle("bi-x");
+                }
+            });
+
+            // Al cargar, aplicar padding si el sidebar está visible
+            if (!sidebar.classList.contains("d-none")) {
+                body.style.paddingLeft = "230px";
+            }
+        }
+    });
+</script>
+</script>

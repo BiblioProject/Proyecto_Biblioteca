@@ -130,10 +130,17 @@ def editGenre(request, id):
     genre = get_object_or_404(Genre, id=id)
     return handle_form(request, GenreForm, 'genres/modals/editGenre.html', instance=genre, redirect_url='genres', context_name='genre_form')
 
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.contrib.auth.models import User
+
 @login_required
 def edit_user(request, id):
     usuario = get_object_or_404(User, id=id)
     is_self = (request.user.id == usuario.id)
+
     if request.method == 'POST':
         form = UsuarioEditarForm(request.POST, instance=usuario, is_self=is_self)
         if form.is_valid():
@@ -149,8 +156,17 @@ def edit_user(request, id):
                     usuario.is_staff = False
                     usuario.is_superuser = False
             usuario.save()
-            return JsonResponse({'success': True, 'redirect_url': reverse('users')})
+
+            # Redirección condicional según el rol del usuario actual
+            if request.user.groups.first() and request.user.groups.first().name == 'Administrador':
+                redirect_url = reverse('users')
+            else:
+                redirect_url = reverse('user')  # Asegúrate que esta URL existe
+
+            return JsonResponse({'success': True, 'redirect_url': redirect_url})
+
         return JsonResponse({'success': False, 'errors': form.errors})
+    
     else:
         form = UsuarioEditarForm(instance=usuario, is_self=is_self)
         return render(request, 'users/modals/edit_user_modal.html', {
@@ -158,6 +174,7 @@ def edit_user(request, id):
             'usuario': usuario,
             'is_self': is_self
         })
+
 
 @login_required(login_url='/app_biblioteca/login/')
 def delete_object(request, model, object_id_name):

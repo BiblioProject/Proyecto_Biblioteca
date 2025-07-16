@@ -39,6 +39,11 @@ def languages_view(request):
 def users_view(request):
     return list_objects(request, User, 'users/users.html', per_page=5)
 
+#Usuario
+@login_required(login_url='/app_biblioteca/login/')
+def user_view(request):
+    return list_objects(request, User, 'users/user.html')
+
 # Préstamos por libro
 @login_required(login_url='/app_biblioteca/login/')
 def lendings_book(request, bookid):
