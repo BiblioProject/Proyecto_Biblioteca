@@ -198,6 +198,13 @@ class LendingForm(forms.ModelForm):
             self.initial['date'] = today
             self.initial['estimated_return_date'] = today + timedelta(days=7)
 
+         # Hacer siempre el campo real_return_date readonly
+        self.fields['real_return_date'].widget.attrs['readonly'] = 'readonly'
+
+        # Si no hay fecha aún, que no aparezca prellenado
+        if not self.instance.real_return_date:
+            self.initial['real_return_date'] = ''
+
 class LanguageForm(forms.ModelForm):
     class Meta:
         model = Language

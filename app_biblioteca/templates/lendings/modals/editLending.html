@@ -34,13 +34,22 @@
                 </div>
                 {% endif %} {% endfor %}
 
-                <!-- Campo: Retorno real (con validación visual) -->
+                <!-- Campo: Retorno real con botón Devolver -->
                 <div class="form-group">
                     {{ lending_form.real_return_date.label_tag }} {{ lending_form.real_return_date }}
                     <div class="invalid-feedback">
                         La fecha de retorno real no puede ser anterior a la fecha de préstamo.
                     </div>
+
+                    {% if not lending.real_return_date %}
+                    <div class="text-right mt-2">
+                        <button type="button" class="btn btn-outline-success" onclick="asignarFechaDevolucion()">
+                            <i class="bi bi-box-arrow-in-left"></i> Devolver
+                        </button>
+                    </div>
+                    {% endif %}
                 </div>
+
 
             </div>
 
@@ -90,4 +99,15 @@
             }
         });
     })();
+
+    function asignarFechaDevolucion() {
+        const returnInput = document.getElementById('id_real_return_date');
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        returnInput.value = `${year}-${month}-${day}`;
+        returnInput.readOnly = true; // Evitar que lo editen luego
+        returnInput.classList.remove('is-invalid');
+    }
 </script>
